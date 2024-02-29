@@ -1,0 +1,14 @@
+# Temporary MD files
+*~*.md
+# No generated file
+**/gen/*/*.yaml
+
+**/gen/**.yaml
+
+**-gen.yaml
+# loc files
+**-loc**
+# No mounted file shares
+**sshfs**
+# No DS Store files
+.DS_Store
