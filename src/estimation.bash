@@ -29,6 +29,7 @@ printInfoSection() {
 
 calculatePodHours() {
 
+    # TODO: make the proper calculation of the POD Hours for the Year
     printInfoSection "POD Hours Calculation"
     # Command 1: This wil help to estimate the average # of pods running per day
     printInfo "SUM of PODs: $(kubectl get pods --all-namespaces | wc -l)"
@@ -59,6 +60,7 @@ calculateMemoryRoundUp() {
     i=0
 
     # Snapshot of actual PODs with their Utilization
+    # TODO: Remove the System and other know Namespaces that are normally not instrumented
     pods_top=$(kubectl top pods --all-namespaces --no-headers)
 
     # See below to understand the process substitution
@@ -85,7 +87,7 @@ calculateMemoryRoundUp() {
         rounded_memories[i]=$m_rounded
         actual_memories[i]=$m
         # We round up to 256
-        echo "$line rounded to $m_rounded Mi"
+        echo "$i|$line rounded to $m_rounded Mi"
         ((i++))
 
     # We read the output using process substitution to save the results in an array within the same process 
