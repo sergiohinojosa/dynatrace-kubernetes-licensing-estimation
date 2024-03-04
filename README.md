@@ -5,8 +5,9 @@
 
 # License estimation for
 
-## - [Application Observability](https://docs.dynatrace.com/docs/manage/subscriptions-and-licensing/dynatrace-platform-subscription/host-monitoring#gib-hour-calculation-for-containers-and-application-only-monitoring)
-## - [Kubernetes Monitoring](https://docs.dynatrace.com/docs/manage/subscriptions-and-licensing/dynatrace-platform-subscription/container-monitoring#kubernetes-monitoring) 
+## - [Application Observability](https://docs.dynatrace.com/docs/manage/subscriptions-and-licensing/dynatrace-platform-subscription/host-monitoring#gib-hour-calculation-for-containers-and-application-only-monitoring) in [GiB-hours](https://docs.dynatrace.com/docs/manage/subscriptions-and-licensing/dynatrace-platform-subscription/host-monitoring#gib-hours)
+
+## - [Kubernetes Monitoring](https://docs.dynatrace.com/docs/manage/subscriptions-and-licensing/dynatrace-platform-subscription/container-monitoring#kubernetes-monitoring) in [POD-hours](https://docs.dynatrace.com/docs/manage/subscriptions-and-licensing/dynatrace-platform-subscription/container-monitoring#pod-hours)
 
 
 ## Contributing
