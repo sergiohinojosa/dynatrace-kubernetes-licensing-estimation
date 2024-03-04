@@ -159,7 +159,7 @@ calculateMemoryYearlyUsage(){
 
 calculateYearlyConsumption(){
 
-     printInfoSection "GiB-Hour and POD-Hour yearly costs estimation"
+     printInfoSection "POD-Hour and GiB-Hour yearly costs estimation"
 
      echo ""
      echo "---- POD-hour estimation ---- "
