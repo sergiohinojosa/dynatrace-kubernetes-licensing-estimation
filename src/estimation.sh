@@ -181,8 +181,7 @@ calculateYearlyConsumption(){
      echo "The price for $yearly_gib_hours yearly GiB-hours is: $yearly_gib_hours_est USD"
      echo ""
 
-
-
+    #TODO: add Classic FullStack Price to compare from the Total Memory of the Cluster?
 
 }
 
