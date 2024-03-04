@@ -2,7 +2,6 @@
 # Simple shell script that assist in the license calculation for
 # Kubernetes Clusters. 
 #
-#
 
 
 # ----------------------
@@ -23,7 +22,7 @@ namespaces_msg="
 
 # List prices $0.002 per POD-hour in USD
 price_pod_hour=0.002
-# List price  $0.01 per Gib-hour AppOnly in USD
+# List price  $0.01 per GiB-hour AppOnly in USD
 price_gib_hour=0.01
 
 declare -r min_memory=256
@@ -71,14 +70,6 @@ calculatePodHours() {
     
 }
 
-getXX() {
-    # Command 2: This wil show the # of pods that you might want to instrument for tracing and profiling
-    kubectl top pods --all-namespaces --sum=true
-
-    # Command 3: This shows how many Istio data planes pods are running
-    kubectl get pod -o "custom-columns=NAME:.metadata.name,INIT:.spec.initContainers[*].name,CONTAINERS:.spec.containers[*].name" --all-namespaces | grep istio-proxy | wc -l
-}
-
 getClusterInfo() {
     printInfoSection "Cluster Information"
     printInfo Cluster-Info
@@ -98,9 +89,11 @@ calculateMemoryRoundUp() {
     echo "$namespaces_msg"
     # Snapshot of actual PODs with their Utilization
     pods_top=$(kubectl top pods --all-namespaces --no-headers | grep -viE $NAMESPACES_TO_EXCLUDE )
-
+    
+    echo "Calculating and rounding up memory of the pods"
     # See comments in 'done' to understand the process substitution
-    while read -r line; do
+    while read -r line; 
+    do
         # We extract the Memory in Mi
         mem=$(echo "$line" | awk '{print($4)}')
         # We extract only the integer
@@ -118,12 +111,12 @@ calculateMemoryRoundUp() {
             fi
         fi
 
-        #echo "adding to array ${memories[*]} $m_rounded from pos $i"
         # save value to array
         rounded_memories[i]=$m_rounded
         actual_memories[i]=$m
+        # TODO: better would be to create summary of #PODs and its Memory per NS.
         # We round up to 256
-        #echo "$i|$line rounded to $m_rounded Mi"
+        echo "$i|$line rounded to $m_rounded Mi"
         ((i++))
 
     # We read the output using process substitution to save the results in an array within the same process 
@@ -167,23 +160,26 @@ calculateYearlyConsumption(){
      yearly_pod_hours=$((total_pods * 24 * 365))
      # Using AWK for floating number calculation 
      yearly_pod_hours_est=$(echo $yearly_pod_hours $price_pod_hour | awk '{print $1 * $2}' )
-     echo "The price for $yearly_pod_hours yearly pod-hours is: $yearly_pod_hours_est USD"
+     echo "The price for $yearly_pod_hours yearly pod-hours is: $ $yearly_pod_hours_est USD"
      echo ""
      
      
      echo ""
      echo "---- GiB-hour estimation ---- "
      echo "The price for GiB-hour is $ $price_gib_hour USD"
-     yearly_gib_hours=$(( (total_memory_rounded * 24 * 365 ) / 1024 ))
+     yearly_gib_hour=$(( (total_memory_rounded * 24 * 365 ) / 1024 ))
+     yearly_gib_hour_actual=$(( (total_memory_actual * 24 * 365 ) / 1024 ))
     
      # Using AWK for floating number calculation 
-     yearly_gib_hours_est=$(echo $yearly_gib_hours $price_gib_hour | awk '{print $1 * $2}' )
-     echo "The price for $yearly_gib_hours yearly GiB-hours is: $yearly_gib_hours_est USD"
+     yearly_gib_hour_est=$(echo $yearly_gib_hour $price_gib_hour | awk '{print $1 * $2}' )
+     yearly_gib_hour_est_actual=$(echo $yearly_gib_hour_actual $price_gib_hour | awk '{print $1 * $2}' )
+     echo "The price for $yearly_gib_hour yearly GiB-hours is: $ $yearly_gib_hour_est USD"
+     echo "The price for $yearly_gib_hour_actual yearly actual GiB-hours is: $ $yearly_gib_hour_est_actual USD"
      echo ""
 
-    #TODO: add Classic FullStack Price to compare from the Total Memory of the Cluster?
-
 }
+
+
 
 
 getClusterInfo
