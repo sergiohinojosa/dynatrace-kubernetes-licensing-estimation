@@ -5,6 +5,8 @@
 
 **/gen/**.yaml
 
+/tmp/**
+
 **-gen.yaml
 # loc files
 **-loc**
