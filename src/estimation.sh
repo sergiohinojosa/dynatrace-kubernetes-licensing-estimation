@@ -61,7 +61,7 @@ calculatePodHours() {
     # Calculation of the POD Hours for the Year
     printInfoSection "POD Hours Calculation"
 
-    total_pods=$(kubectl get pods --all-namespaces | wc -l)
+    total_pods=$(kubectl get pods --all-namespaces --no-headers | wc -l)
     # Command 1: This wil help to estimate the average # of pods running per day
     printInfo "SUM of PODs in the Cluster: $total_pods"
 
