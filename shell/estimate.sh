@@ -56,6 +56,15 @@ infolog="[License-estimation|INFO] $(timestamp) |"
 #
 # ---- License estimation logic
 #
+getClusterInfo() {
+    printInfoSection "Cluster Information"
+    printInfo Cluster-Info
+    kubectl cluster-info
+
+    printInfo "Nodes Utilization"
+    kubectl top nodes
+}
+
 calculatePodHours() {
 
     # Calculation of the POD Hours for the Year
@@ -65,21 +74,9 @@ calculatePodHours() {
     # Command 1: This will help to estimate the average # of pods running per day
     printInfo "SUM of PODs in the Cluster: $total_pods"
 
-    printInfo "Assuming these $total_pods pods run for 24 hours and 365 days"
-    printInfo "The yearly pod-hour consumption is $((total_pods * 24 * 365)) pod-hours"
+    printInfo "Assuming these $total_pods pods run for 24 hours"
+    printInfo "The daily pod-hour consumption is $((total_pods * 24)) pod-hours"
     
-}
-
-getClusterInfo() {
-    printInfoSection "Cluster Information"
-    printInfo Cluster-Info
-    kubectl cluster-info
-
-    printInfo "Nodes Information"
-    kubectl get nodes -o wide
-
-    printInfo "Nodes Utilization"
-    kubectl top nodes
 }
 
 calculateMemoryRoundUp() {
@@ -95,15 +92,16 @@ calculateMemoryRoundUp() {
     while read -r line; 
     do
         # We extract the Memory in Mi
-        mem=$(echo "$line" | awk '{print($4)}')
+        mem_s=$(echo "$line" | awk '{print($4)}')
         # We extract only the integer
-        m=$(echo "$mem" | tr -dc '0-9')
+        m=$(echo "$mem_s" | tr -dc '0-9')
         if ((m < min_memory)); then
             m_rounded=$min_memory
         else
-            a=$((m / min_memory))
+            # Calculate the dividend
+            dividend=$((m / min_memory))
 
-            m_rounded=$((a * min_memory))
+            m_rounded=$((dividend * min_memory))
 
             # If we have remainders we increase to next round up
             if [[ $((m % min_memory)) -gt 0 ]]; then
@@ -111,7 +109,7 @@ calculateMemoryRoundUp() {
             fi
         fi
 
-        # save value to array
+        # Save value to array
         rounded_memories[i]=$m_rounded
         actual_memories[i]=$m
         # TODO: better would be to create summary of #PODs and its Memory per NS.
@@ -129,9 +127,9 @@ calculateMemoryRoundUp() {
     echo ""
 }
 
-calculateMemoryYearlyUsage(){
+calculateMemoryDailyUsage(){
      
-    printInfoSection "POD Memory Yearly Usage Estimation"
+    printInfoSection "POD Memory usage Estimation"
     
     for k in "${!rounded_memories[@]}"
     do
@@ -141,40 +139,43 @@ calculateMemoryYearlyUsage(){
     total_memory_rounded=$((total_memory_rounded * 24 ))
     total_memory_actual=$((total_memory_actual * 24 ))
 
-    printInfo "For the ${#rounded_memories[@]} PODs these are the calculations assuming they run 24/7 for 365 days"
+    printInfo "For the ${#rounded_memories[@]} PODs these are the calculations assuming they run 24/7 for 30 days"
 
-    echo "Hourly Total Memory rounded $total_memory_rounded Mi/h"
-    echo "Hourly Total Memory actual $total_memory_actual Mi/h"
+    echo "Daily Total Memory rounded $total_memory_rounded Mi/h"
+    echo "Daily Total Memory actual $total_memory_actual Mi/h"
     echo ""
-    echo "Yearly Total Memory rounded $(( (total_memory_rounded * 24 * 365 ) / 1024 )) GiB/h"
-    echo "Yearly Total Memory actual $(( (total_memory_actual * 24 * 365 ) / 1024 )) GiB/h"
+    echo "Monthly (30 days) Total Memory rounded $(( (total_memory_rounded  * 30 ) / 1024 )) GiB-hours"
+    echo "Monthly (30 days) Total Memory actual $(( (total_memory_actual  * 30 ) / 1024 )) GiB-hours"
+    echo ""
+    echo "Yearly (365 days) Total Memory rounded $(( (total_memory_rounded  * 365 ) / 1024 )) GiB-hours"
+    echo "Yearly (365 days) Total Memory actual $(( (total_memory_actual  * 365 ) / 1024 )) GiB-hours"
 }
 
-calculateYearlyConsumption(){
+calculateEstimation(){
 
-     printInfoSection "POD-Hour and GiB-Hour yearly costs estimation"
+     printInfoSection "POD-Hour and GiB-Hour Monthly and Yearly costs estimation"
 
      echo ""
      echo "---- POD-hour estimation ---- "
      echo "The price for POD-hour is $ $price_pod_hour USD"
-     yearly_pod_hours=$((total_pods * 24 * 365))
+     pod_hours_month=$((total_pods * 24 * 30))
      # Using AWK for floating number calculation 
-     yearly_pod_hours_est=$(echo $yearly_pod_hours $price_pod_hour | awk '{print $1 * $2}' )
-     echo "The price for $yearly_pod_hours yearly pod-hours is: $ $yearly_pod_hours_est USD"
+     pod_hours_month_est=$(echo $pod_hours_month $price_pod_hour | awk '{print $1 * $2}' )
+     echo "The price for $pod_hours_month monthly pod-hours is: $ $pod_hours_month_est USD"
      echo ""
      
      
      echo ""
      echo "---- GiB-hour estimation ---- "
      echo "The price for GiB-hour is $ $price_gib_hour USD"
-     yearly_gib_hour=$(( (total_memory_rounded * 24 * 365 ) / 1024 ))
-     yearly_gib_hour_actual=$(( (total_memory_actual * 24 * 365 ) / 1024 ))
+     gib_hour_month=$(( (total_memory_rounded * 30 ) / 1024 ))
+     gib_hour_year=$(( (total_memory_rounded * 365 ) / 1024 ))
     
      # Using AWK for floating number calculation 
-     yearly_gib_hour_est=$(echo $yearly_gib_hour $price_gib_hour | awk '{print $1 * $2}' )
-     yearly_gib_hour_est_actual=$(echo $yearly_gib_hour_actual $price_gib_hour | awk '{print $1 * $2}' )
-     echo "The price for $yearly_gib_hour yearly GiB-hours is: $ $yearly_gib_hour_est USD"
-     echo "The price for $yearly_gib_hour_actual yearly actual GiB-hours is: $ $yearly_gib_hour_est_actual USD"
+     gib_hour_month_est=$(echo $gib_hour_month $price_gib_hour | awk '{print $1 * $2}' )
+     gib_hour_year_est=$(echo $gib_hour_year $price_gib_hour | awk '{print $1 * $2}' )
+     echo "The price for $gib_hour_month monthly GiB-hours is: $ $gib_hour_month_est USD"
+     echo "The price for $gib_hour_year yearly GiB-hours is: $ $gib_hour_year_est USD"
      echo ""
 
 }
@@ -188,7 +189,7 @@ calculatePodHours
 
 calculateMemoryRoundUp
 
-calculateMemoryYearlyUsage
+calculateMemoryDailyUsage
 
-calculateYearlyConsumption
+calculateEstimation
 

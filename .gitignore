@@ -3,10 +3,20 @@
 # No generated file
 **/gen/*/*.yaml
 
-**/gen/**.yaml
+# No logs
+log/*
 
+**/gen/**.yaml
+# No temp
 /tmp/**
 
+# Dont add test files
+*test*
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+
+# generated files
 **-gen.yaml
 # loc files
 **-loc**
