@@ -1,0 +1,10 @@
+{
+	"tenant_url": "https://mytenant.live.dynatrace.com",
+	"api_token": "dt0c01.XXX.XXXXX",
+	"log_dir": "log",
+	"log_file": "estimate.log",
+	"actions": {
+		"xxxxx": false,
+		"bbbbb": false
+	}
+}

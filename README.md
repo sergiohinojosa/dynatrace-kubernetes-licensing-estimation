@@ -9,6 +9,15 @@
 
 ## - [Kubernetes Monitoring](https://docs.dynatrace.com/docs/manage/subscriptions-and-licensing/dynatrace-platform-subscription/container-monitoring#kubernetes-monitoring) in [POD-hours](https://docs.dynatrace.com/docs/manage/subscriptions-and-licensing/dynatrace-platform-subscription/container-monitoring#pod-hours)
 
+## Troubleshooting
+
+
+python3 -m venv .venv
+source .venv/bin/activate
+pip3 install -r requirements.txt
+python3 main.py
+
+
 
 ## Contributing
 If you have any ideas for improvements or want to contribute that's great. Create a pull request or file an issue.
