@@ -24,3 +24,6 @@ __pycache__/
 **sshfs**
 # No DS Store files
 .DS_Store
+
+# No Config file
+config.json
