@@ -61,7 +61,7 @@ q_to_unit=":toUnit(Byte," + unit + ")"
 q_resolution="&resolution="+ resolution
 q_from="&from=" + from_timeframe
 
-# Put the parametrized Wuery together
+# Put the parametrized Query together
 query = query_body + q_to_unit + q_resolution + q_from
 
 class EmptyResponse:
