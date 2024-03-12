@@ -1,0 +1,85 @@
+
+{
+    "unitId": "Bit",
+    "displayName": "bit",
+    "symbol": "bit",
+    "displayNamePlural": "bits"
+},
+{
+    "unitId": "KiloBit",
+    "displayName": "kilobit",
+    "symbol": "kbit",
+    "displayNamePlural": "kilobits"
+},
+{
+    "unitId": "KibiBit",
+    "displayName": "kibibit",
+    "symbol": "Kibit",
+    "displayNamePlural": "kibibits"
+},
+{
+    "unitId": "MegaBit",
+    "displayName": "megabit",
+    "symbol": "Mbit",
+    "displayNamePlural": "megabits"
+},
+{
+    "unitId": "MebiBit",
+    "displayName": "mebibit",
+    "symbol": "Mibit",
+    "displayNamePlural": "mebibits"
+},
+{
+    "unitId": "GigaBit",
+    "displayName": "gigabit",
+    "symbol": "Gbit",
+    "displayNamePlural": "gigabits"
+},
+{
+    "unitId": "GibiBit",
+    "displayName": "gibibit",
+    "symbol": "Gibit",
+    "displayNamePlural": "gibibits"
+},
+{
+    "unitId": "Byte",
+    "displayName": "byte",
+    "symbol": "B",
+    "displayNamePlural": "bytes"
+},
+{
+    "unitId": "KiloByte",
+    "displayName": "kilobyte",
+    "symbol": "kB",
+    "displayNamePlural": "kilobytes"
+},
+{
+    "unitId": "KibiByte",
+    "displayName": "kibibyte",
+    "symbol": "KiB",
+    "displayNamePlural": "kibibytes"
+},
+{
+    "unitId": "MegaByte",
+    "displayName": "megabyte",
+    "symbol": "MB",
+    "displayNamePlural": "megabytes"
+},
+{
+    "unitId": "MebiByte",
+    "displayName": "mebibyte",
+    "symbol": "MiB",
+    "displayNamePlural": "mebibytes"
+},
+{
+    "unitId": "GigaByte",
+    "displayName": "gigabyte",
+    "symbol": "GB",
+    "displayNamePlural": "gigabytes"
+},
+{
+    "unitId": "GibiByte",
+    "displayName": "gibibyte",
+    "symbol": "GiB",
+    "displayNamePlural": "gibibytes"
+}

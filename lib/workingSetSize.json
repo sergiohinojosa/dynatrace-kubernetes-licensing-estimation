@@ -1,0 +1,54 @@
+{
+    "metricId": "builtin:tech.generic.mem.workingSetSize",
+    "displayName": "Process memory",
+    "description": "This metric provides the memory usage of a process. It helps to identify processes with high memory resource consumption and memory leaks. The metric value represents the sum of every process worker's used memory size (including shared memory). The result is expressed in bytes. It has a \"Process\" dimension (dt.entity.process_group_instance).",
+    "unit": "Byte",
+    "dduBillable": false,
+    "billable": false,
+    "created": 0,
+    "lastWritten": 1710182834604,
+    "entityType": [
+        "PROCESS_GROUP_INSTANCE"
+    ],
+    "aggregationTypes": [
+        "auto",
+        "avg",
+        "max",
+        "min"
+    ],
+    "transformations": [
+        "filter",
+        "fold",
+        "limit",
+        "merge",
+        "names",
+        "parents",
+        "timeshift",
+        "sort",
+        "last",
+        "splitBy",
+        "lastReal",
+        "partition",
+        "setUnit"
+    ],
+    "defaultAggregation": {
+        "type": "avg"
+    },
+    "dimensionDefinitions": [
+        {
+            "key": "dt.entity.process_group_instance",
+            "name": "Process",
+            "displayName": "Process",
+            "index": 0,
+            "type": "ENTITY"
+        }
+    ],
+    "tags": [],
+    "metricValueType": {
+        "type": "unknown"
+    },
+    "scalar": false,
+    "resolutionInfSupported": true,
+    "unitDisplayFormat": "binary",
+    "exported": true
+}

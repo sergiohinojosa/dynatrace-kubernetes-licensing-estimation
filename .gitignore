@@ -10,11 +10,17 @@ log/*
 # No temp
 /tmp/**
 
+# No Reports
+/report/**
+
 # Dont add test files
 *test*
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
+
+# No other configs
+config_**.json
 
 # generated files
 **-gen.yaml

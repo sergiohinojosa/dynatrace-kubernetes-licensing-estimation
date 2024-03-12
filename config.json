@@ -1,10 +1,12 @@
 {
 	"tenant_url": "https://mytenant.live.dynatrace.com",
-	"api_token": "dt0c01.XXX.XXXXX",
+	"api_token": "dt0c01.XXX.YYY",
+	"report_dir": "report",
 	"log_dir": "log",
 	"log_file": "estimate.log",
-	"actions": {
-		"xxxxx": false,
-		"bbbbb": false
+	"query": {
+		"resolution": "15m",
+		"unit": "GibiByte",
+		"from": "now-27d"
 	}
 }
