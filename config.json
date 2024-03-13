@@ -8,5 +8,9 @@
 		"resolution": "15m",
 		"unit": "GibiByte",
 		"from": "now-27d"
+	},
+	"mission_control": {
+		"ssoCSRFCookie":"xxx",
+		"JSESSIONID":"xxx"
 	}
 }

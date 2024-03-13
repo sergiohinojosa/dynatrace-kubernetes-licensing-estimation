@@ -3,7 +3,6 @@
 # Kubernetes Clusters. 
 #
 
-
 # ----------------------
 # Variables declaration and helper 
 # functions

@@ -10,6 +10,9 @@ import datetime
 import traceback
 import requests
 
+# TODO Documentation
+# TODO Installation PIP Requirements
+# TODO Mission Control
 
 # POD-hour calculation as per doc
 # https://docs.dynatrace.com/docs/shortlink/dps-containers#billing-granularity-for-pod-hour-consumption
@@ -22,6 +25,7 @@ import requests
 config = json.load(open('config.json'))
 
 min_memory = 0.25
+MANAGED_DNS = "managed.internal.dynatrace"
 
 LOG_FILE = config['log_file']
 LOG_DIR = config['log_dir']
@@ -30,6 +34,8 @@ REPORT_DIR = config['report_dir']
 TENANT_URL = config['tenant_url']
 API_TOKEN = config['api_token']
 
+ssoCSRFCookie = config['mission_control']['ssoCSRFCookie']
+JSESSIONID = config['mission_control']['JSESSIONID']
 
 unit=config['query']['unit']
 resolution=config['query']['resolution']
@@ -100,7 +106,17 @@ class PGI:
                 self.memory_rounded = self.memory_rounded + min_memory
 
         # We divide the memory and multiply by the amount ot timeslots was found to calculate the Gib-hour
-        self.memory_total = (self.memory_rounded / 4) * self.count
+        if resolution == "1h":
+            self.memory_total = self.memory_rounded * self.count
+        elif resolution == "15m":
+            self.memory_total = (self.memory_rounded / 4) * self.count
+        elif resolution == "1d":
+            self.memory_total = self.memory_rounded * self.count * 24
+        else:
+            logging.error("Resolution not expected for calulating total memory %s", resolution)
+            self.memory_total = (self.memory_rounded / 4) * self.count
+
+
         logging.debug("%s", self)
 
     def get_list_values(self):
@@ -140,7 +156,12 @@ def get_header_json():
 
 def get_header():
     """"Header builder"""
-    return {'content-type': 'application/json', "Authorization": "Api-Token " + API_TOKEN}
+    return {'content-type': 'application/json', "Authorization": "Api-Token " + API_TOKEN }
+
+def get_header_managed():
+    """"Header builder for MC"""
+    return {'content-type': 'application/json', "Authorization": "Api-Token " + API_TOKEN , 
+            "Cookie": "ssoCSRFCookie= " + ssoCSRFCookie + ";JSESSIONID=" + JSESSIONID }
 
 def verify_request():
     """Verify request"""
@@ -152,7 +173,14 @@ def get_now_as_string():
 
 def do_get(endpoint):
     """Function get http request"""
-    response = requests.get(TENANT_URL + endpoint, headers=get_header(), verify=verify_request(), timeout=10)
+    if MANAGED_DNS in TENANT_URL:
+        logging.info("Querying a Managed server, you need to be inside Dynatrace internal network")
+        logging.info("Using MC Cookies from config file")
+        logging.info("Node:%s", TENANT_URL)
+        endpoint = endpoint + "&Api-Token " + API_TOKEN
+        response = requests.get(TENANT_URL + endpoint, headers=get_header_managed(), verify=verify_request(), timeout=120)
+    else:
+        response = requests.get(TENANT_URL + endpoint, headers=get_header(), verify=verify_request(), timeout=10)       
     logging.debug("GET Reponse content: %s - %s ", str(response.content), endpoint)
     return response
 
@@ -179,7 +207,7 @@ def validate_set_action_status(response, action, defaultvalue=''):
 
 def estimate_costs():
     """Function to estimate the costs"""
-    logging.info("Fetching all PGI datapoints in %s intervals and their AVG Memory from the API...", resolution)
+    logging.info("Fetching all PGI datapoints from %s in %s intervals and their AVG Memory from the API...", from_timeframe, resolution)
     response = do_get(query)
     
     # Validate response
@@ -192,15 +220,21 @@ def estimate_costs():
     response_resolution = json_payload['resolution']
     dataPointCountRatio = json_payload['result'][0]['dataPointCountRatio']
     dimensionCountRatio = json_payload['result'][0]['dimensionCountRatio']
+    
+    try:
+        warnings = json_payload['warnings']
+        logging.error("Warnings in the response:%s",warnings)
+    except KeyError:
+        logging.debug("No warnings in the response")
+    
     logging.info("Total Count:%s, response_resolution:%s, dataPointCountRatio:%s, dimensionCountRatio:%s, nextPageKey:%s",totalCount,response_resolution, dataPointCountRatio, dimensionCountRatio, nextPageKey)
-    # TODO Validate Resolution of 15m, change logic?
+    
     if resolution != response_resolution:
         logging.warning("The response resolution of %s does not match the requested resolution %s", response_resolution, resolution)
 
-    # TODO Check for Warnings in response
     # TODO Do we need to calculate ratios?
     # TODO Get Names in the payload
-    # TODO Do a report
+
     total_memory = 0
 
     # Add the PGIs with the count
