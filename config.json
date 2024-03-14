@@ -5,9 +5,10 @@
 	"log_dir": "log",
 	"log_file": "estimate.log",
 	"query": {
-		"resolution": "15m",
+		"resolution": "1h",
 		"unit": "GibiByte",
-		"from": "now-27d"
+		"from": "2024-02-01T00:00",
+		"to": "2024-02-29T23:59"
 	},
 	"mission_control": {
 		"ssoCSRFCookie":"xxx",
