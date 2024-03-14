@@ -10,9 +10,23 @@ import datetime
 import traceback
 import requests
 
+# TODO Add query pods-hours
+
 # TODO Documentation
+
 # TODO Installation PIP Requirements
+
 # TODO Mission Control
+
+# TODO Logic to iterate based on warnings. Make Time shorter and divide queries in shorter timeframes.
+
+# TODO Add also the result with 1h resolution.
+
+# TODO Test 30m resolution
+
+# TODO query with to and from
+
+# TODO Count the amount of PODs that lived < timeframe
 
 # POD-hour calculation as per doc
 # https://docs.dynatrace.com/docs/shortlink/dps-containers#billing-granularity-for-pod-hour-consumption
@@ -25,6 +39,7 @@ import requests
 config = json.load(open('config.json'))
 
 min_memory = 0.25
+
 MANAGED_DNS = "managed.internal.dynatrace"
 
 LOG_FILE = config['log_file']
@@ -40,10 +55,14 @@ JSESSIONID = config['mission_control']['JSESSIONID']
 unit=config['query']['unit']
 resolution=config['query']['resolution']
 from_timeframe=config['query']['from']
+to_timeframe=config['query']['to']
+
+# API V2 Endpoint for metric selection
+q_metric_selector_endpoint="/api/v2/metrics/query?metricSelector="
 #
 # Query to fetch the avg size of K8s PGIs and the ammount of datapoints with a 
 # 15m resolution 
-query_body="""/api/v2/metrics/query?metricSelector=
+query_body="""
 builtin:tech.generic.mem.workingSetSize:parents:filter(
 and(
 in("dt.entity.process_group_instance",entitySelector("type(PROCESS_GROUP_INSTANCE),
@@ -65,10 +84,61 @@ in("dt.entity.host",entitySelector("type(HOST),paasVendorType(OPENSHIFT)")))
 """
 q_to_unit=":toUnit(Byte," + unit + ")"
 q_resolution="&resolution="+ resolution
+q_resolution_1h="&resolution=1h"
 q_from="&from=" + from_timeframe
+q_to="&to="+ to_timeframe
+q_podhour_metric = """builtin:kubernetes.pods:splitBy("dt.entity.cloud_application_namespace"):count:fold(sum)"""
 
 # Put the parametrized Query together
-query = query_body + q_to_unit + q_resolution + q_from
+query_pods_by_ns = q_metric_selector_endpoint +  q_podhour_metric + q_from + q_to + q_resolution_1h
+
+# Put the parametrized Query together
+query_memory = q_metric_selector_endpoint + query_body + q_to_unit + q_resolution + q_from
+
+class Query:
+
+    def __init__(self, query):
+        self.query = query
+        self.response = {}
+        self.json_payload = {}
+        self.warnings = []
+        self.pgis = {}
+        self.shortliving_pgis = []
+        self.total_memory = 0
+
+    def set_response(self, response):
+        self.response = response
+
+    def set_json_payload(self, json_payload):
+        self.json_payload = json_payload
+
+    def set_warnings(self, warnings):
+        self.warnings = warnings
+    
+    def get_query(self):
+        return self.query
+    
+    def get_response(self):
+        return self.response
+    
+    def get_warnings(self):
+        return self.warnings
+    
+    def get_json_payload(self):
+        return self.json_payload
+    
+    def get_pgis(self):
+        return self.pgis
+    
+    def get_shortliving_pgis(self):
+        return self.shortliving_pgis
+    
+    def get_total_memory(self):
+        return self.total_memory
+    
+    def set_total_memory(self, total_memory):
+        self.total_memory = total_memory
+    
 
 class EmptyResponse:
     """Set an empty response with code"""
@@ -77,7 +147,7 @@ class EmptyResponse:
     content = 'Empty'
 
    
-# Sample class with init method
+# PGI class 
 class PGI:
     # init method or constructor
     def __init__(self, id, count, memory):
@@ -90,7 +160,6 @@ class PGI:
     def get_memory_total(self):
         return self.memory_total
     
-    # Sample Method
     def set_memory(self, memory):
         self.memory = memory
 
@@ -108,16 +177,21 @@ class PGI:
         # We divide the memory and multiply by the amount ot timeslots was found to calculate the Gib-hour
         if resolution == "1h":
             self.memory_total = self.memory_rounded * self.count
+
         elif resolution == "15m":
             self.memory_total = (self.memory_rounded / 4) * self.count
+
+        elif resolution == "6h":
+            self.memory_total = self.memory_rounded * self.count * 6
+
         elif resolution == "1d":
             self.memory_total = self.memory_rounded * self.count * 24
+
         else:
             logging.error("Resolution not expected for calulating total memory %s", resolution)
             self.memory_total = (self.memory_rounded / 4) * self.count
 
-
-        logging.debug("%s", self)
+        logging.debug("Set memory for %s", self)
 
     def get_list_values(self):
         """Returns the list of values"""
@@ -174,9 +248,9 @@ def get_now_as_string():
 def do_get(endpoint):
     """Function get http request"""
     if MANAGED_DNS in TENANT_URL:
-        logging.info("Querying a Managed server, you need to be inside Dynatrace internal network")
-        logging.info("Using MC Cookies from config file")
-        logging.info("Node:%s", TENANT_URL)
+        logging.debug("Querying a Managed server, you need to be inside Dynatrace internal network")
+        logging.debug("Using MC Cookies from config file")
+        logging.debug("Node:%s", TENANT_URL)
         endpoint = endpoint + "&Api-Token " + API_TOKEN
         response = requests.get(TENANT_URL + endpoint, headers=get_header_managed(), verify=verify_request(), timeout=120)
     else:
@@ -184,10 +258,12 @@ def do_get(endpoint):
     logging.debug("GET Reponse content: %s - %s ", str(response.content), endpoint)
     return response
 
-def validate_set_action_status(response, action, defaultvalue=''):
-    """Validate response"""
+
+def validate_query(query, action, defaultvalue=''):
+    """Validate response and payload"""
     result = defaultvalue
     action_status = True
+    response = query.get_response()
 
     if 200 <= response.status_code <= 300:
         # If not default value, then set the reason
@@ -195,55 +271,110 @@ def validate_set_action_status(response, action, defaultvalue=''):
             result = response.reason
 
         action_status = True
+        json_payload = json.loads(response.text)
+        query.set_json_payload(json_payload)
+
+        totalCount = json_payload['totalCount']
+        nextPageKey = json_payload['nextPageKey']
+        response_resolution = json_payload['resolution']
+        dataPointCountRatio = json_payload['result'][0]['dataPointCountRatio']
+        dimensionCountRatio = json_payload['result'][0]['dimensionCountRatio']
+    
+        try:
+            # TODO Verify if its correct type
+            # TODO modify encapsulating
+            warnings = json_payload['warnings']
+            query.set_warnings(warnings)
+            logging.error("Warnings in the response:%s",warnings)
+        except KeyError:
+            logging.debug("No warnings in the response")
+    
+        logging.debug("Total Count:%s, response_resolution:%s, dataPointCountRatio:%s, dimensionCountRatio:%s, nextPageKey:%s",totalCount,response_resolution, dataPointCountRatio, dimensionCountRatio, nextPageKey)
+        
+        if resolution != response_resolution:
+            logging.warning("The response resolution of %s does not match the requested resolution %s", response_resolution, resolution)
+    
     else:
         result = str(response.status_code)
-        logging.warning(action + ':\t code:' + result +
-                        ' reason:' + response.reason + ' Content:' + str(response.content))
+        logging.warning("%s :\t code:%s reason:%s  Content:%s", action, result, response.reason, str(response.content))
         action_status = False
 
-    logging.info(action + ':\t' + result)
-    logging.debug(action + ':\t' + result + 'Content:' + str(response.content))
+    logging.info("%s:%s",action,result)
+    logging.debug("%s:%s Content:%s",action, result, str(response.content))
     return action_status
+
+
+
+def estimate_podhours(podQuery):
+    """Function to calculate the pod hours"""
+
+    podQuery.set_response(do_get(podQuery.get_query()))
+
+    # Validate response
+    if not validate_query(podQuery, "Query [builtin:kubernetes.pods] status"):
+        return
+
+    # Work with the payload
+    logging.debug("this is what I got" + str(podQuery.get_json_payload()))
+    # TODO Finish the calculation by NS
+
+    return
+
 
 def estimate_costs():
     """Function to estimate the costs"""
-    logging.info("Fetching all PGI datapoints from %s in %s intervals and their AVG Memory from the API...", from_timeframe, resolution)
-    response = do_get(query)
+    logging.info("Fetching all PGI datapoints from %s to %s in %s intervals and their avg memory from the API...", from_timeframe, to_timeframe, resolution)
     
-    # Validate response
-    if not validate_set_action_status(response, 'Query [builtin:tech.generic.mem.workingSetSize] status'):
-        return
-
-    json_payload = json.loads(response.text)
-    totalCount = json_payload['totalCount']
-    nextPageKey = json_payload['nextPageKey']
-    response_resolution = json_payload['resolution']
-    dataPointCountRatio = json_payload['result'][0]['dataPointCountRatio']
-    dimensionCountRatio = json_payload['result'][0]['dimensionCountRatio']
-    
-    try:
-        warnings = json_payload['warnings']
-        logging.error("Warnings in the response:%s",warnings)
-    except KeyError:
-        logging.debug("No warnings in the response")
-    
-    logging.info("Total Count:%s, response_resolution:%s, dataPointCountRatio:%s, dimensionCountRatio:%s, nextPageKey:%s",totalCount,response_resolution, dataPointCountRatio, dimensionCountRatio, nextPageKey)
-    
-    if resolution != response_resolution:
-        logging.warning("The response resolution of %s does not match the requested resolution %s", response_resolution, resolution)
-
     # TODO Do we need to calculate ratios?
     # TODO Get Names in the payload
+    
+    # Calculate the POD-hours
+    podQuery = Query(query_pods_by_ns)
+    estimate_podhours(podQuery)
 
-    total_memory = 0
+    # Calculate the Gib-hours
+    memQuery = Query(query_memory)
+    estimate_memory(memQuery)
+    
+    write_report(memQuery.get_pgis(), memQuery.get_total_memory())
 
-    # Add the PGIs with the count
-    pgis = {}
+    total_instances = len(memQuery.get_pgis())
+    total_shortliving_instances = len(memQuery.get_shortliving_pgis())
+    percentage_shortliving = 100 * float(total_shortliving_instances)/float(total_instances)
+
+    logging.info("Total Memory is %s GiB-hour for %s pod instances", memQuery.get_total_memory(), total_instances)
+    logging.info("%s instances lived under %s vs a total of %s instances equals %s %%",total_shortliving_instances , resolution, total_instances , ("%.3f" % percentage_shortliving))
+
+    return 
+
+
+def estimate_memory(memQuery):
+    """ Function to estimate the Gib-hour consumption"""
+    # pgis, total_memory, shortliving_pgis
+    memQuery.set_response(do_get(memQuery.get_query()))
+
+    # Validate response
+    if not validate_query(memQuery, "Query [builtin:tech.generic.mem.workingSetSize] status"):
+        return
+    
+    json_payload = memQuery.get_json_payload()
+    pgis = memQuery.get_pgis()
+    shortliving_pgis = memQuery.get_shortliving_pgis()
+    total_memory = memQuery.get_total_memory()
+
+    # Work with the payload
+    # We iterate in count
     for line in json_payload['result'][0]['data']:
         pgi_id = line['dimensions'][0]
         count = line['values'][0]
-        pgis[pgi_id]= PGI(pgi_id, count, 0);
-    
+        pgi = PGI(pgi_id, count, 0);
+        pgis[pgi_id]= pgi
+
+        # We store the shortliving pgis to be aware of
+        # their ratio.
+        if count == 1:
+            shortliving_pgis.append(pgi)
+
     # Add and calculate the Memory
     for line in json_payload['result'][1]['data']:
         pgi_id = line['dimensions'][0]
@@ -252,11 +383,10 @@ def estimate_costs():
         pgi.set_memory(mem)
         total_memory = total_memory + pgi.get_memory_total()
 
-    logging.info("Total Memory is %s GiB-hour for %s pod instances", total_memory, len(pgis))
+    memQuery.set_total_memory(total_memory)
 
-    write_report(pgis, total_memory)
-    
-    return 
+    return
+
 
 def write_report(pgis, total_memory):
 
@@ -296,11 +426,12 @@ def main():
         logging.info("=================================================")
         logging.info("")
         logging.info("Fetching all pod instances that have run in Kubernetes or ")
-        logging.info("Openshift environments for the timeframe of %s" , from_timeframe)
+        logging.info("Openshift environments from %s to %s" , from_timeframe, to_timeframe)
         logging.info("")
         logging.info("-------------------------------------------------")
         logging.info("Tenant: %s", TENANT_URL)
-        logging.info("Log file: %s", LOG_FILE)
+        logging.debug("Log file: %s", LOG_FILE)
+
         estimate_costs()
 
     except Exception as e:  # catch all exceptions
@@ -336,4 +467,3 @@ def doUsage(args):
 # Start Main
 if __name__ == "__main__":
     main()
-
