@@ -49,6 +49,9 @@ REPORT_DIR = config['report_dir']
 TENANT_URL = config['tenant_url']
 API_TOKEN = config['api_token']
 
+price_pod_hour =  config['price_pod_hour']
+price_gib_hour =  config['price_gib_hour']
+
 ssoCSRFCookie = config['mission_control']['ssoCSRFCookie']
 JSESSIONID = config['mission_control']['JSESSIONID']
 
@@ -87,7 +90,7 @@ q_resolution="&resolution="+ resolution
 q_resolution_1h="&resolution=1h"
 q_from="&from=" + from_timeframe
 q_to="&to="+ to_timeframe
-q_podhour_metric = """builtin:kubernetes.pods:splitBy("dt.entity.cloud_application_namespace"):count:fold(sum)"""
+q_podhour_metric = "builtin:kubernetes.pods:splitBy():sum:fold(value)"
 
 # Put the parametrized Query together
 query_pods_by_ns = q_metric_selector_endpoint +  q_podhour_metric + q_from + q_to + q_resolution_1h
@@ -105,6 +108,8 @@ class Query:
         self.pgis = {}
         self.shortliving_pgis = []
         self.total_memory = 0
+        self.issues = False
+        self.total_pod_hours = 0
 
     def set_response(self, response):
         self.response = response
@@ -138,6 +143,19 @@ class Query:
     
     def set_total_memory(self, total_memory):
         self.total_memory = total_memory
+    
+    def had_issues(self):
+        return self.issues
+    
+    def has_issues(self):
+        self.issues = True
+
+    def get_total_pod_hours(self):
+        return self.total_pod_hours
+    
+    def set_total_pod_hours(self, total_pod_hours):
+        self.total_pod_hours = total_pod_hours
+
     
 
 class EmptyResponse:
@@ -262,32 +280,41 @@ def do_get(endpoint):
 def validate_query(query, action, defaultvalue=''):
     """Validate response and payload"""
     result = defaultvalue
-    action_status = True
+    status = True
     response = query.get_response()
+    json_payload = query.get_json_payload()
 
     if 200 <= response.status_code <= 300:
         # If not default value, then set the reason
         if not defaultvalue:
             result = response.reason
 
-        action_status = True
-        json_payload = json.loads(response.text)
-        query.set_json_payload(json_payload)
-
-        totalCount = json_payload['totalCount']
-        nextPageKey = json_payload['nextPageKey']
-        response_resolution = json_payload['resolution']
-        dataPointCountRatio = json_payload['result'][0]['dataPointCountRatio']
-        dimensionCountRatio = json_payload['result'][0]['dimensionCountRatio']
-    
+        status = True
         try:
-            # TODO Verify if its correct type
-            # TODO modify encapsulating
+            json_payload = json.loads(response.text)
+            query.set_json_payload(json_payload)
+
+            totalCount = json_payload['totalCount']
+            nextPageKey = json_payload['nextPageKey']
+            response_resolution = json_payload['resolution']
+            dataPointCountRatio = json_payload['result'][0]['dataPointCountRatio']
+            dimensionCountRatio = json_payload['result'][0]['dimensionCountRatio']
+    
             warnings = json_payload['warnings']
             query.set_warnings(warnings)
             logging.error("Warnings in the response:%s",warnings)
         except KeyError:
             logging.debug("No warnings in the response")
+        except json.decoder.JSONDecodeError:
+            if MANAGED_DNS in TENANT_URL:
+                logging.error("Please make sure that you have set the proper Mission Control Cookies 'ssoCSRFCookie' 'JSESSIONID'")
+                logging.error("and you have established a connection to the Cluster via MC.")
+                query.has_issues()
+                return False
+            else:
+                # raise uknown e
+                query.has_issues()
+                raise
     
         logging.debug("Total Count:%s, response_resolution:%s, dataPointCountRatio:%s, dimensionCountRatio:%s, nextPageKey:%s",totalCount,response_resolution, dataPointCountRatio, dimensionCountRatio, nextPageKey)
         
@@ -297,11 +324,12 @@ def validate_query(query, action, defaultvalue=''):
     else:
         result = str(response.status_code)
         logging.warning("%s :\t code:%s reason:%s  Content:%s", action, result, response.reason, str(response.content))
-        action_status = False
+        query.has_issues()
+        status = False
 
     logging.info("%s:%s",action,result)
     logging.debug("%s:%s Content:%s",action, result, str(response.content))
-    return action_status
+    return status
 
 
 
@@ -315,8 +343,9 @@ def estimate_podhours(podQuery):
         return
 
     # Work with the payload
-    logging.debug("this is what I got" + str(podQuery.get_json_payload()))
-    # TODO Finish the calculation by NS
+    # TODO Finish the calculation by NS for doing a report
+    total_pod_hours = int(podQuery.get_json_payload()['result'][0]['data'][0]['values'][0])
+    podQuery.set_total_pod_hours(total_pod_hours)
 
     return
 
@@ -327,23 +356,38 @@ def estimate_costs():
     
     # TODO Do we need to calculate ratios?
     # TODO Get Names in the payload
-    
     # Calculate the POD-hours
     podQuery = Query(query_pods_by_ns)
     estimate_podhours(podQuery)
+
+    if podQuery.had_issues():
+        # If there is an issue with this query we go out.
+        return
 
     # Calculate the Gib-hours
     memQuery = Query(query_memory)
     estimate_memory(memQuery)
     
-    write_report(memQuery.get_pgis(), memQuery.get_total_memory())
+    # write_report(memQuery.get_pgis(), memQuery.get_total_memory())
 
     total_instances = len(memQuery.get_pgis())
     total_shortliving_instances = len(memQuery.get_shortliving_pgis())
     percentage_shortliving = 100 * float(total_shortliving_instances)/float(total_instances)
+    
+    logging.info("")
+    t_pod_h = podQuery.get_total_pod_hours()
+    t_gib_h = memQuery.get_total_memory()
+    k8_costs= t_pod_h * price_pod_hour
+    app_costs= t_gib_h * price_gib_hour
 
-    logging.info("Total Memory is %s GiB-hour for %s pod instances", memQuery.get_total_memory(), total_instances)
+    logging.info("Total POD hours are %s", str(t_pod_h))
+    logging.info("")
+    logging.info("Total Memory is %s GiB-hour for %s pod instances", t_gib_h, total_instances)
     logging.info("%s instances lived under %s vs a total of %s instances equals %s %%",total_shortliving_instances , resolution, total_instances , ("%.3f" % percentage_shortliving))
+    logging.info("")
+    logging.info("Kubernetes Monitoring estimated costs are %s POD-hours * %s USD = %s USD", t_pod_h, str(price_pod_hour), str(k8_costs))
+    logging.info("Application Observability estimated costs are %s GiB-hours * %s USD = %s USD", t_gib_h, str(price_gib_hour), str(app_costs))
+    logging.info("Total costs are %s USD", str(k8_costs + app_costs) )
 
     return 
 
@@ -422,7 +466,10 @@ def main():
         printUsage = False
 
         logging.info("=================================================")
-        logging.info("Starting Dynatrace Kubernetes License Estimation\n")
+        logging.info("   Dynatrace License Estimation for      \n")
+        logging.info("        Kubernetes Monitoring")
+        logging.info("                 and ")
+        logging.info("      Application Observability  ")
         logging.info("=================================================")
         logging.info("")
         logging.info("Fetching all pod instances that have run in Kubernetes or ")
@@ -442,7 +489,7 @@ def main():
     if printUsage:
         doUsage(sys.argv)
     else:
-        print("\nDone calculatig costs... have a nice day")
+        print("\nDone calculating costs... have a nice day")
     exit
 
 
