@@ -365,17 +365,13 @@ def estimate_podhours(podQuery):
 
 def estimate_costs():
     """Function to estimate the costs"""
-    logging.info("Fetching all PGI datapoints from %s to %s in %s intervals and their avg memory from the API...", from_timeframe, to_timeframe, resolution)
-    
-    # TODO Do we need to calculate ratios?
     # TODO Get Names in the payload
-
     pod_Queries = []
     mem_Queries = []
 
     # We Iterate the whole i times
     if iterative_query:
-        logging.info("Iterative query mode activated. Iterating %s times by %s days", iterations, days_per_iteration)
+        logging.info("Fetching all PGI datapoints from %s. Iterating %s times by %s days in %s resolution", from_timeframe, iterations, days_per_iteration, resolution)
 
         date_from = datetime.datetime.strptime(from_timeframe, FORMAT_DATE)
         
@@ -402,6 +398,7 @@ def estimate_costs():
             mem_query.set_date_to(date_from_end)
             mem_Queries.append(mem_query)
     else:
+        logging.info("Fetching all PGI datapoints from %s until %s in %s resolution", from_timeframe, to_timeframe, resolution)
         # To is static - already embebded in the query string
         date_to = datetime.datetime.strptime(to_timeframe, FORMAT_DATE)
 
@@ -469,7 +466,7 @@ def estimate_costs():
     logging.info("Application Observability estimated costs are %s Gib-hours * %s USD = $%s USD", f"{t_gib_h:,}", str(price_gib_hour), f"{app_costs:,}")
     
     logging.info("")
-    logging.info("Total costs are $%s USD", str(k8_costs + app_costs))
+    logging.info("Total costs are $%s USD", f"{(k8_costs + app_costs):,}")
 
     return 
 
@@ -553,7 +550,7 @@ def main():
         logging.info("=================================================")
         logging.info("")
         logging.info("Fetching all pod instances that have run in Kubernetes or ")
-        logging.info("Openshift environments from %s to %s" , from_timeframe, to_timeframe)
+        logging.info("Openshift environments")
         logging.info("")
         logging.info("-------------------------------------------------")
         logging.info("Tenant: %s", TENANT_URL)
