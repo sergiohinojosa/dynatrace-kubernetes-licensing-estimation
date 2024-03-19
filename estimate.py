@@ -15,8 +15,6 @@ import requests
 
 # TODO Installation PIP Requirements
 
-# TODO Mission Control - Solved. Manual fetch.
-
 # TODO Logic to iterate based on warnings. Make Time shorter and divide queries in shorter timeframes.
 
 # TODO Add also the result with 1h resolution.
