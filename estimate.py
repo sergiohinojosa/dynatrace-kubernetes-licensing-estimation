@@ -318,7 +318,7 @@ def validate_query(query, action, defaultvalue=''):
     
             warnings = json_payload['warnings']
             query.set_warnings(warnings)
-            logging.error("Warnings in the response:%s",warnings)
+            logging.error("%s:warnings in the response:%s", action, warnings)
         except KeyError:
             logging.debug("No warnings in the response")
         except json.decoder.JSONDecodeError:
@@ -459,10 +459,10 @@ def estimate_costs():
     k8_costs= t_pod_h * price_pod_hour
     app_costs= t_gib_h * price_gib_hour
     
-    logging.info("Kubernetes Monitoring consumption from %s to %s = %s pod-hours", from_timeframe, to_timeframe, f"{t_pod_h:,}")
+    logging.info("Kubernetes Monitoring consumption from %s to %s = %s pod-hours", from_timeframe, date_to, f"{t_pod_h:,}")
     logging.info("Kubernetes Monitoring estimated costs are %s pod-hours * %s USD = $%s USD", f"{t_pod_h:,}", str(price_pod_hour), f"{k8_costs:,}")
     logging.info("")
-    logging.info("Application Observability consumption from %s to %s = %s Gib-hours", from_timeframe, to_timeframe, f"{t_gib_h:,}")
+    logging.info("Application Observability consumption from %s to %s = %s Gib-hours", from_timeframe, date_to, f"{t_gib_h:,}")
     logging.info("Application Observability estimated costs are %s Gib-hours * %s USD = $%s USD", f"{t_gib_h:,}", str(price_gib_hour), f"{app_costs:,}")
     
     logging.info("")
