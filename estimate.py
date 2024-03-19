@@ -15,16 +15,6 @@ import requests
 
 # TODO Installation PIP Requirements
 
-# TODO Logic to iterate based on warnings. Make Time shorter and divide queries in shorter timeframes.
-
-# TODO Add also the result with 1h resolution.
-
-# TODO Test 30m resolution
-
-# TODO query with to and from
-
-# TODO Count the amount of PODs that lived < timeframe
-
 # POD-hour calculation as per doc
 # https://docs.dynatrace.com/docs/shortlink/dps-containers#billing-granularity-for-pod-hour-consumption
 
