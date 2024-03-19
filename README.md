@@ -11,12 +11,10 @@
 
 ## Troubleshooting
 
-
 python3 -m venv .venv
 source .venv/bin/activate
 pip3 install -r requirements.txt
 python3 main.py
-
 
 
 ## Contributing
@@ -24,3 +22,4 @@ If you have any ideas for improvements or want to contribute that's great. Creat
 
 ## Author 
 sergio.hinojosa@dynatrace.com
+

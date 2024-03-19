@@ -4,11 +4,16 @@
 	"report_dir": "report",
 	"log_dir": "log",
 	"log_file": "estimate.log",
+	"price_pod_hour": 0.002,
+	"price_gib_hour": 0.01,
 	"query": {
 		"resolution": "1h",
 		"unit": "GibiByte",
-		"from": "2024-02-01T00:00",
-		"to": "2024-02-29T23:59"
+		"from": "2024-02-01",
+		"to": "2024-02-29",
+		"iterations": 4,
+		"days_per_iteration": 7,
+		"iterative_query": true
 	},
 	"mission_control": {
 		"ssoCSRFCookie":"xxx",

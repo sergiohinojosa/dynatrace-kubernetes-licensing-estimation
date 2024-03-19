@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 # Required Libraries.
+import calendar
 import csv
 import json
 import logging
@@ -10,13 +11,11 @@ import datetime
 import traceback
 import requests
 
-# TODO Add query pods-hours
-
 # TODO Documentation
 
 # TODO Installation PIP Requirements
 
-# TODO Mission Control
+# TODO Mission Control - Solved. Manual fetch.
 
 # TODO Logic to iterate based on warnings. Make Time shorter and divide queries in shorter timeframes.
 
@@ -34,14 +33,13 @@ import requests
 # GiBHour calculation  
 # https://docs.dynatrace.com/docs/manage/subscriptions-and-licensing/dynatrace-platform-subscription/host-monitoring#gib-hour-calculation-for-containers-and-application-only-monitoring
 
-
 # Read Configuration and assign the variables
 config = json.load(open('config.json'))
 
 min_memory = 0.25
 
 MANAGED_DNS = "managed.internal.dynatrace"
-
+FORMAT_DATE = '%Y-%m-%d'
 LOG_FILE = config['log_file']
 LOG_DIR = config['log_dir']
 REPORT_DIR = config['report_dir']
@@ -59,6 +57,10 @@ unit=config['query']['unit']
 resolution=config['query']['resolution']
 from_timeframe=config['query']['from']
 to_timeframe=config['query']['to']
+iterations=config['query']['iterations']
+days_per_iteration=config['query']['days_per_iteration']
+iterative_query=config['query']['iterative_query']
+
 
 # API V2 Endpoint for metric selection
 q_metric_selector_endpoint="/api/v2/metrics/query?metricSelector="
@@ -88,15 +90,19 @@ in("dt.entity.host",entitySelector("type(HOST),paasVendorType(OPENSHIFT)")))
 q_to_unit=":toUnit(Byte," + unit + ")"
 q_resolution="&resolution="+ resolution
 q_resolution_1h="&resolution=1h"
-q_from="&from=" + from_timeframe
-q_to="&to="+ to_timeframe
+q_from="&from=" 
+q_from_t = q_from + from_timeframe
+q_to="&to="
+q_to_t= q_to + to_timeframe
 q_podhour_metric = "builtin:kubernetes.pods:splitBy():sum:fold(value)"
 
 # Put the parametrized Query together
-query_pods_by_ns = q_metric_selector_endpoint +  q_podhour_metric + q_from + q_to + q_resolution_1h
+query_pods_by_ns_static = q_metric_selector_endpoint +  q_podhour_metric + q_resolution_1h + q_from_t + q_to_t 
+query_pods_by_ns_dyn = q_metric_selector_endpoint +  q_podhour_metric + q_resolution_1h 
 
 # Put the parametrized Query together
-query_memory = q_metric_selector_endpoint + query_body + q_to_unit + q_resolution + q_from
+query_memory_static = q_metric_selector_endpoint + query_body + q_to_unit + q_resolution + q_from_t + q_to_t 
+query_memory_dyn = q_metric_selector_endpoint + query_body + q_to_unit + q_resolution  
 
 class Query:
 
@@ -110,6 +116,9 @@ class Query:
         self.total_memory = 0
         self.issues = False
         self.total_pod_hours = 0
+        self.date_from = None
+        self.date_to = None
+
 
     def set_response(self, response):
         self.response = response
@@ -155,18 +164,28 @@ class Query:
     
     def set_total_pod_hours(self, total_pod_hours):
         self.total_pod_hours = total_pod_hours
+    
+    def get_date_from(self):
+        return self.date_from
+    
+    def set_date_from(self, date_from):
+        self.date_from = date_from
+
+    def get_date_to(self):
+        return self.date_to
+    
+    def set_date_to(self, date_to):
+        self.date_to = date_to
 
     
-
 class EmptyResponse:
     """Set an empty response with code"""
     status_code = 500
     reason = 'Unkown'
     content = 'Empty'
 
-   
-# PGI class 
 class PGI:
+    """ PGI Class, contains logic for rounding up and calculating total memory per PGI based on resolution"""
     # init method or constructor
     def __init__(self, id, count, memory):
         self.id = id
@@ -276,7 +295,6 @@ def do_get(endpoint):
     logging.debug("GET Reponse content: %s - %s ", str(response.content), endpoint)
     return response
 
-
 def validate_query(query, action, defaultvalue=''):
     """Validate response and payload"""
     result = defaultvalue
@@ -327,11 +345,9 @@ def validate_query(query, action, defaultvalue=''):
         query.has_issues()
         status = False
 
-    logging.info("%s:%s",action,result)
+    logging.debug("%s:%s",action,result)
     logging.debug("%s:%s Content:%s",action, result, str(response.content))
     return status
-
-
 
 def estimate_podhours(podQuery):
     """Function to calculate the pod hours"""
@@ -349,48 +365,115 @@ def estimate_podhours(podQuery):
 
     return
 
-
 def estimate_costs():
     """Function to estimate the costs"""
     logging.info("Fetching all PGI datapoints from %s to %s in %s intervals and their avg memory from the API...", from_timeframe, to_timeframe, resolution)
     
     # TODO Do we need to calculate ratios?
     # TODO Get Names in the payload
-    # Calculate the POD-hours
-    podQuery = Query(query_pods_by_ns)
-    estimate_podhours(podQuery)
 
-    if podQuery.had_issues():
-        # If there is an issue with this query we go out.
-        return
+    pod_Queries = []
+    mem_Queries = []
 
-    # Calculate the Gib-hours
-    memQuery = Query(query_memory)
-    estimate_memory(memQuery)
+    # We Iterate the whole i times
+    if iterative_query:
+        logging.info("Iterative query mode activated. Iterating %s times by %s days", iterations, days_per_iteration)
+
+        date_from = datetime.datetime.strptime(from_timeframe, FORMAT_DATE)
+        
+        for i in range(iterations):
+
+            if i == 0:
+                date_from_start = date_from 
+                date_from_end = date_from + datetime.timedelta(days=days_per_iteration)
+            else:
+                date_from_start = date_from + datetime.timedelta(days=(i * days_per_iteration))
+                date_from_end = date_from + datetime.timedelta(days=((i * days_per_iteration) + days_per_iteration))
+
+            # Convert microseconds in miliseconds
+            q_from_dyn = q_from + str(int(date_from_start.timestamp() * 1000))
+            q_to_dyn = q_to + str(int(date_from_end.timestamp() * 1000))
+            
+            pod_query = Query(query_pods_by_ns_dyn + q_from_dyn + q_to_dyn)
+            pod_query.set_date_from(date_from_start)
+            pod_query.set_date_to(date_from_end)
+            pod_Queries.append(pod_query)
+
+            mem_query = Query(query_memory_dyn + q_from_dyn + q_to_dyn)
+            mem_query.set_date_from(date_from_start)
+            mem_query.set_date_to(date_from_end)
+            mem_Queries.append(mem_query)
+    else:
+        # To is static - already embebded in the query string
+        date_to = datetime.datetime.strptime(to_timeframe, FORMAT_DATE)
+
+        pod_query = Query(query_pods_by_ns_static)
+        pod_query.set_date_from(date_from)
+        pod_query.set_date_to(date_to)
+        pod_Queries.append(pod_query)
+        
+        mem_query = Query(query_memory_static)
+        mem_query.set_date_from(date_from)
+        mem_query.set_date_to(date_to)
+        mem_Queries.append(mem_query)
+        logging.debug("From to Query mode activated.")
+
+    # Execute the Queries
+    actual_i = len(pod_Queries)
+
+    t_pod_h = 0
+    t_gib_h = 0
+    t_instances = 0
+    t_shortliving_instances = 0
+
+    for i in range(actual_i):
+        # Calculate the POD-hours
+        pod_query = pod_Queries[i]
+        estimate_podhours(pod_query)
+        if pod_query.had_issues():
+            # If there is an issue with this query we go out.
+            return
+        
+        # Calculate the Gib-hours
+        mem_query = mem_Queries[i]
+        estimate_memory(mem_query)
     
-    # write_report(memQuery.get_pgis(), memQuery.get_total_memory())
+        # write_report(memQuery.get_pgis(), memQuery.get_total_memory())
+        instances = len(mem_query.get_pgis())
+        shortliving_instances = len(mem_query.get_shortliving_pgis())
+        percentage_shortliving = 100 * float(shortliving_instances)/float(instances)
 
-    total_instances = len(memQuery.get_pgis())
-    total_shortliving_instances = len(memQuery.get_shortliving_pgis())
-    percentage_shortliving = 100 * float(total_shortliving_instances)/float(total_instances)
-    
-    logging.info("")
-    t_pod_h = podQuery.get_total_pod_hours()
-    t_gib_h = memQuery.get_total_memory()
+        date_from = pod_query.get_date_from().strftime(FORMAT_DATE)
+        date_to = pod_query.get_date_to().strftime(FORMAT_DATE)
+        
+        l = " " + str(i + 1) + " of "+ str(days_per_iteration) +"d \t"+ date_from + " to " + date_to
+
+        pod_h = pod_query.get_total_pod_hours()
+        gib_h = mem_query.get_total_memory()
+
+        logging.info("%s\t%s pod-hours", l, str(pod_h))
+        logging.info("%s\t%s GiB-hours - %s pod instances",l , gib_h, instances)
+        logging.info("%s\t%s instances lived under %s vs a total of %s instances equals %s %%",l, shortliving_instances , resolution, instances , ("%.3f" % percentage_shortliving))
+        logging.info("")
+
+        t_pod_h = t_pod_h + pod_h
+        t_gib_h = t_gib_h + gib_h
+        t_instances = t_instances + instances
+        t_shortliving_instances = t_shortliving_instances + shortliving_instances
+        
     k8_costs= t_pod_h * price_pod_hour
     app_costs= t_gib_h * price_gib_hour
-
-    logging.info("Total POD hours are %s", str(t_pod_h))
+    
+    logging.info("Kubernetes Monitoring consumption from %s to %s = %s pod-hours", from_timeframe, to_timeframe, t_pod_h)
+    logging.info("Kubernetes Monitoring estimated costs are %s pod-hours * %s USD = %s USD", t_pod_h, str(price_pod_hour), str(k8_costs))
     logging.info("")
-    logging.info("Total Memory is %s GiB-hour for %s pod instances", t_gib_h, total_instances)
-    logging.info("%s instances lived under %s vs a total of %s instances equals %s %%",total_shortliving_instances , resolution, total_instances , ("%.3f" % percentage_shortliving))
+    logging.info("Application Observability consumption from %s to %s = %s Gib-hours", from_timeframe, to_timeframe, t_gib_h)
+    logging.info("Application Observability estimated costs are %s Gib-hours * %s USD = %s USD", t_gib_h, str(price_gib_hour), str(app_costs))
+    
     logging.info("")
-    logging.info("Kubernetes Monitoring estimated costs are %s POD-hours * %s USD = %s USD", t_pod_h, str(price_pod_hour), str(k8_costs))
-    logging.info("Application Observability estimated costs are %s GiB-hours * %s USD = %s USD", t_gib_h, str(price_gib_hour), str(app_costs))
-    logging.info("Total costs are %s USD", str(k8_costs + app_costs) )
+    logging.info("Total costs are %s USD", str(k8_costs + app_costs))
 
     return 
-
 
 def estimate_memory(memQuery):
     """ Function to estimate the Gib-hour consumption"""
@@ -411,7 +494,7 @@ def estimate_memory(memQuery):
     for line in json_payload['result'][0]['data']:
         pgi_id = line['dimensions'][0]
         count = line['values'][0]
-        pgi = PGI(pgi_id, count, 0);
+        pgi = PGI(pgi_id, count, 0)
         pgis[pgi_id]= pgi
 
         # We store the shortliving pgis to be aware of
@@ -430,7 +513,6 @@ def estimate_memory(memQuery):
     memQuery.set_total_memory(total_memory)
 
     return
-
 
 def write_report(pgis, total_memory):
 
@@ -466,7 +548,7 @@ def main():
         printUsage = False
 
         logging.info("=================================================")
-        logging.info("   Dynatrace License Estimation for      \n")
+        logging.info("   Dynatrace License cost estimation for      \n")
         logging.info("        Kubernetes Monitoring")
         logging.info("                 and ")
         logging.info("      Application Observability  ")
@@ -492,7 +574,6 @@ def main():
         print("\nDone calculating costs... have a nice day")
     exit
 
-
 def get_usage_as_string():
     return """
 Dynatrace Kubernetes License Estimation 
@@ -502,7 +583,6 @@ Usage: estimate.py
 *** For more information read the README.md file ***
 ================================================================
 """
-
 
 def doUsage(args):
     "Just printing Usage"
