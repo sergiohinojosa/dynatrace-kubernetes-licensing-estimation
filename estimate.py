@@ -450,7 +450,7 @@ def estimate_costs():
         gib_h = mem_query.get_total_memory()
 
         logging.info("%s\t%s pod-hours", l, str(pod_h))
-        logging.info("%s\t%s GiB-hours - %s pod instances",l , gib_h, instances)
+        logging.info("%s\t%s GiB-hours from %s pod instances",l , gib_h, instances)
         logging.info("%s\t%s instances lived under %s vs a total of %s instances equals %s %%",l, shortliving_instances , resolution, instances , ("%.3f" % percentage_shortliving))
         logging.info("")
 
@@ -463,10 +463,10 @@ def estimate_costs():
     app_costs= t_gib_h * price_gib_hour
     
     logging.info("Kubernetes Monitoring consumption from %s to %s = %s pod-hours", from_timeframe, to_timeframe, t_pod_h)
-    logging.info("Kubernetes Monitoring estimated costs are %s pod-hours * %s USD = %s USD", t_pod_h, str(price_pod_hour), str(k8_costs))
+    logging.info("Kubernetes Monitoring estimated costs are %s pod-hours * %s USD = %s USD", t_pod_h, str(price_pod_hour), str(int(k8_costs)))
     logging.info("")
     logging.info("Application Observability consumption from %s to %s = %s Gib-hours", from_timeframe, to_timeframe, t_gib_h)
-    logging.info("Application Observability estimated costs are %s Gib-hours * %s USD = %s USD", t_gib_h, str(price_gib_hour), str(app_costs))
+    logging.info("Application Observability estimated costs are %s Gib-hours * %s USD = %s USD", t_gib_h, str(price_gib_hour), str(int(app_costs)))
     
     logging.info("")
     logging.info("Total costs are %s USD", str(k8_costs + app_costs))
