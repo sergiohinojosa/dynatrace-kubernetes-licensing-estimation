@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %} Estimate {% endblock %}
+{% block body %}
+{% if session['logged_in'] %}
+
+
+Data stored in the session:
+
+<p> session.logged_in: {{ session.logged_in }} </p>
+<p>Tenant URL: {{ session.tenant_url }} </p>
+<p>API-Token: {{ session.api_token }} </p>
+
+{% else %}
+<form action="/estimate" method="POST">
+    <div class="login">
+        <div class="login-screen">
+            <div class="app-title">
+    				<h1>Estimate Kubernetes Usage</h1>
+    			</div>
+            <div class="estimate-form">
+                <div class="control-group">
+                        <input type="tenant_url" name="tenant_url" placeholder="Tenant URL">
+                        <br>
+                        <input type="password" name="api_token" placeholder="API Token">
+                        <br>
+            </div>
+                    <input type="submit" value="Estimate costs" class="btn btn-primary btn-lg btn-block">
+                <br>
+            </div>
+        </div>
+    </div>
+</form>
+    {% if error %}
+    <p class=error><strong>There was an error::</strong> {{ error }}</p>
+    {% endif %}
+
+{% endif %}
+
+{% endblock %}

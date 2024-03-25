@@ -5,10 +5,17 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python: Current File",
+            "name": "Flask",
             "type": "debugpy",
             "request": "launch",
-            "program": "${file}",
+            "program": "run.py",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Estimate CLI",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "estimate.py",
             "console": "integratedTerminal"
         }
     ]
