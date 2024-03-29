@@ -13,24 +13,6 @@ LOG_FILE = "estimate.log"
 LOG_DIR = "log"
 REPORT_DIR = "report"
 
-
-  
-# declaringa a class
-class obj:
-    
-    # constructor
-    def __init__(self, dict1):
-        self.__dict__.update(dict1)
-
-  
-def dict2obj(dict1):
-     
-    # using json.loads method and passing json.dumps
-    # method and custom object hook as arguments
-    return json.loads(json.dumps(dict1), object_hook=obj)
-
-
-
 # POD-hour calculation as per doc
 # https://docs.dynatrace.com/docs/shortlink/dps-containers#billing-granularity-for-pod-hour-consumption
 
@@ -71,6 +53,7 @@ class Estimate:
 
         self.k8_costs = 0
         self.app_costs = 0
+        self.errors = ""
 
         # Dynamic Query
         # API V2 Endpoint for metric selection

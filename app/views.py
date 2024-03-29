@@ -37,36 +37,17 @@ def estimate():
     uid = get_init_session_id()
     
     if request.method == 'POST':
-
-        try:
-            if estimate is None:
-                # Initialize from Form
-                tenant_url = request.form['tenant_url']
-                api_token = request.form['api_token']    
-                estimate = Estimate.Estimate(tenant_url, api_token, uid)
-                estimate.estimation_running = True
-                # Add in cache
-                set_user_cache(estimate)
-
-                # Start job
-                thread = Thread(target=estimation.do_work, kwargs={'e': request.args.get('e', estimate)})
-                thread.start()
+    # POST Handling
+        if estimate is not None:
+            if estimate.estimation_running:
+                print("is already running, lets wait")
         
-        # Exception handling 
-        except:
-            print("Error")
-          
-        
-        if estimate.estimation_running:
-            print("yes, lets wait")
-            # Exception handling, how to check in object for warning/error? 
-        else:
-            print("Is not running, should be kicked again, dif param?")
-
+        start_estimation(estimate, uid)
     else:
-        # GET
+    # GET Handling
         if estimate is None:
             print("load the view again")
+            return render_template('estimate.html', error=error, estimate=estimate)
         else:
             print("ESTIMATE:")
             print(estimate.__dict__)
@@ -75,6 +56,36 @@ def estimate():
         return redirect(url_for('estimate', estimate=estimate))
     
     return render_template('estimate.html', error=error, estimate=estimate)
+
+
+
+def start_estimation(estimate, uid):
+
+    if estimate is None:
+        # Initialize from Form
+        tenant_url = request.form['tenant_url']
+        api_token = request.form['api_token']    
+        estimate = Estimate.Estimate(tenant_url, api_token, uid)
+    
+    # reset values
+    estimate.errors = ""
+    estimate.tenant_url = request.form['tenant_url']
+    estimate.api_token = request.form['api_token'] 
+
+    # Flag for running
+    estimate.estimation_running = True
+    
+    # Add in cache
+    set_user_cache(estimate)
+
+    # Start job
+    thread = Thread(target=estimation.estimate_costs_wrapper, kwargs={'e': request.args.get('e', estimate)})
+    thread.start()
+    
+
+
+
+
 
 @app.route("/logout")
 def logout():

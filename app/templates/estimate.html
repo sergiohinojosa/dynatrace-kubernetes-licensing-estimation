@@ -7,7 +7,13 @@
 Data stored in the session:
 {% if estimate is not none %}
 <p> session Estimate mem: {{ estimate }} </p>
-<p> session Estimate values: {{ estimate.__dict__ }} </p>
+<p> Tenant: {{ estimate.tenant_url}} </p>
+<p> K8s costs: {{ estimate.k8_costs}} </p>
+<p> App costs: {{ estimate.app_costs}} </p>
+<p> Total Pod Hours: {{ estimate.t_pod_h}} </p>
+<p> Total Gib Hours: {{ estimate.t_gib_h}} </p>
+<p> Total shortliving instances: {{ estimate.t_shortliving_instances}} </p>
+<p> Total instances: {{ estimate.t_instances}} </p>
 {% endif %}
 
 <p>
@@ -41,8 +47,8 @@ NOT Running, so lets print form
         </div>
     </div>
 </form>
-    {% if error %}
-    <p class=error><strong>There was an error::</strong> {{ error }}</p>
+    {% if estimate.errors %}
+    <p class=has-error><strong>There was an error:</strong> {{ estimate.errors }}</p>
     {% endif %}
 
 {% endif %}

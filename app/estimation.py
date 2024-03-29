@@ -161,23 +161,30 @@ def do_work(e):
     return
 
 
-def estimate_costs(e):
-
-    if e == None:
-        # TODO Pass all variables to estimate
-        print("NEED TO REFACTOR")
-
+def estimate_costs_wrapper(e):
+    """Wrapper function for estimate_costs for effective error handling"""
     e.set_estimation_running(True)
+    logging.info("Calculating estimation for tenant: %s and session %s", e.tenant_url, e.uid)
+    try:
+        estimate_costs(e)
+        # Set all ok
+        e.set_estimation_running(False)
+        # No errors    
+        set_user_cache(e)
+    except Exception as err:
+        e.set_estimation_running(False)
+        e.errors = str(err)
+        set_user_cache(e)
+        logging.error("There was an error: %s", err)
+        return
+    return
 
-    print(e.get_tenant_url())
-    print(e.get_api_token())
+
+def estimate_costs(e):
 
     """Function to estimate the costs"""
     pod_Queries = []
     mem_Queries = []
-
-    # TODO Get variables from WEB Session 
-    # or from Config
 
     # We iterate the whole i times
     if e.iterative_query:
