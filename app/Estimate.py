@@ -40,9 +40,10 @@ def dict2obj(dict1):
 
 class Estimate:
 
-    def __init__(self, tenant_url, api_token):
+    def __init__(self, tenant_url, api_token, uid):
         self.tenant_url = tenant_url
         self.api_token = api_token
+        self.uid = uid
         self.estimation_running = False
         
         # Managed Vars

@@ -1,11 +1,16 @@
+import os
 from app import app, Estimate, estimation
 from threading import Thread
 from flask import Flask, render_template, redirect, url_for, request, session, abort, flash
-from .cache import cache
+from .cache import *
+
 
 @app.route('/')
 def index():
-    estimate = cache.get("estimate")
+
+    # Get Cache for unique session, None if not available
+    estimate = get_user_cache_from_session()
+
     if estimate is not None :
         if estimate.estimation_running:
             print("Estimation running.. loading estimate...")
@@ -28,20 +33,21 @@ def contact():
 @app.route('/estimate', methods=['GET', 'POST'])
 def estimate():
     error = None
-    estimate = cache.get("estimate")
+    estimate = get_user_cache_from_session()
+    uid = get_init_session_id()
     
     if request.method == 'POST':
 
         try:
-
             if estimate is None:
                 # Initialize from Form
                 tenant_url = request.form['tenant_url']
                 api_token = request.form['api_token']    
-                estimate = Estimate.Estimate(tenant_url, api_token)
+                estimate = Estimate.Estimate(tenant_url, api_token, uid)
                 estimate.estimation_running = True
                 # Add in cache
-                cache.set("estimate",  estimate)
+                set_user_cache(estimate)
+
                 # Start job
                 thread = Thread(target=estimation.do_work, kwargs={'e': request.args.get('e', estimate)})
                 thread.start()

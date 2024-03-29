@@ -9,7 +9,7 @@ import sys
 import time
 import datetime
 import traceback
-from .cache import cache
+from .cache import *
 import requests
 
 from app import Estimate as conf
@@ -156,7 +156,7 @@ def do_work(e):
     time.sleep(20)
     e.estimation_running = False
     e.k8_costs = 1000
-    cache.set("estimate", e)
+    set_user_cache(e)
     print("woke up and adding to cache")
     return
 
