@@ -9,7 +9,7 @@ import sys
 import time
 import datetime
 import traceback
-from flask import session
+from .cache import cache
 import requests
 
 from app import Estimate as conf
@@ -156,10 +156,8 @@ def do_work(e):
     time.sleep(20)
     e.estimation_running = False
     e.k8_costs = 1000
-    print("woke up")
-    session['estimate'] = e.__dict__
-    print("Rewrote in Session")
-    
+    cache.set("estimate", e)
+    print("woke up and adding to cache")
     return
 
 
