@@ -9,6 +9,7 @@ import sys
 import time
 import datetime
 import traceback
+from flask import session
 import requests
 
 # TODO Documentation
@@ -91,6 +92,7 @@ query_pods_by_ns_dyn = q_metric_selector_endpoint +  q_podhour_metric + q_resolu
 # Put the parametrized Query together
 query_memory_static = q_metric_selector_endpoint + query_body + q_to_unit + q_resolution + q_from_t + q_to_t 
 query_memory_dyn = q_metric_selector_endpoint + query_body + q_to_unit + q_resolution  
+
 
 class Query:
 
@@ -359,7 +361,16 @@ def estimate_costs():
     pod_Queries = []
     mem_Queries = []
 
-    # We Iterate the whole i times
+    # TODO Get variables from WEB Session 
+    # or from Config
+
+    if session['logged_in']:
+        print(session['logged_in'])
+        print(session['tenant_url'])
+        print(session['api_token'])
+    #    return
+
+    # We iterate the whole i times
     if iterative_query:
         logging.info("Fetching all PGI datapoints from %s. Iterating %s times by %s days in %s resolution", from_timeframe, iterations, days_per_iteration, resolution)
 

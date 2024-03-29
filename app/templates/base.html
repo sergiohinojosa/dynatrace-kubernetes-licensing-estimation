@@ -26,10 +26,10 @@
       <div class="header clearfix">
         <nav>
           <ul class="nav nav-pills pull-right">
-            {% if session['logged_in'] == True %}
             <li role="presentation"><a href="/">Home</a></li>
             <li role="presentation"><a href="/about">About</a></li>
             <li role="presentation"><a href="/contact">Contact</a></li>
+            {% if session['logged_in'] == True %}
             <li role="presentation"><a href="/logout">Logout</a></li>
             {% endif %}
           </ul>
