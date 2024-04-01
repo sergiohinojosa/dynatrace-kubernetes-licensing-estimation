@@ -175,7 +175,7 @@ def estimate_costs_wrapper(e):
         e.set_estimation_running(False)
         e.errors = str(err)
         set_user_cache(e)
-        logging.error("There was an error: %s", err)
+        logging.error("There was an error: %s", e)
         return
     return
 

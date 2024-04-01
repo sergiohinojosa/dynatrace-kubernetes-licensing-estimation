@@ -9,18 +9,8 @@ from .cache import *
 def index():
 
     # Get Cache for unique session, None if not available
-    estimate = get_user_cache_from_session()
-
-    if estimate is not None :
-        if estimate.estimation_running:
-            print("Estimation running.. loading estimate...")
-            return render_template('estimate.html', estimate=estimate)
-        else:
-            print("Estimation not running.. loading estimate...")
-            return render_template('estimate.html', estimate=estimate)
-    else:
-        print("Estimation not running.. loading estimate form...")
-        return render_template('estimate.html', estimate=estimate)
+    estimate = get_init_user_cache_from_session()
+    return render_template('index.html', estimate=estimate)
 
 @app.route('/about')
 def about():
@@ -33,58 +23,46 @@ def contact():
 @app.route('/estimate', methods=['GET', 'POST'])
 def estimate():
     error = None
-    estimate = get_user_cache_from_session()
-    uid = get_init_session_id()
+    estimate = get_init_user_cache_from_session()
     
     if request.method == 'POST':
     # POST Handling
-        if estimate is not None:
-            if estimate.estimation_running:
-                print("is already running, lets wait")
-        
-        start_estimation(estimate, uid)
+        if estimate.estimation_running:
+            print("Estimation is already running")
+            flash('Estimation is already running')
+        else:    
+            start_estimation(estimate)
     else:
     # GET Handling
-        if estimate is None:
-            print("load the view again")
-            return render_template('estimate.html', error=error, estimate=estimate)
-        else:
-            print("ESTIMATE:")
-            print(estimate.__dict__)
-        
-        flash('Estimation running')
-        return redirect(url_for('estimate', estimate=estimate))
+        return render_template('estimate.html', error=error, estimate=estimate)
     
     return render_template('estimate.html', error=error, estimate=estimate)
 
 
 
-def start_estimation(estimate, uid):
+def start_estimation(estimate):
 
-    if estimate is None:
-        # Initialize from Form
-        tenant_url = request.form['tenant_url']
-        api_token = request.form['api_token']    
-        estimate = Estimate.Estimate(tenant_url, api_token, uid)
-    
+    # TODO Validate all Form Fields
     # reset values
     estimate.errors = ""
     estimate.tenant_url = request.form['tenant_url']
     estimate.api_token = request.form['api_token'] 
 
-    # Flag for running
-    estimate.estimation_running = True
+
+    if estimate.tenant_url == "":
+                estimate.errors = "Please enter a valid Tenant url"
     
     # Add in cache
     set_user_cache(estimate)
 
-    # Start job
-    thread = Thread(target=estimation.estimate_costs_wrapper, kwargs={'e': request.args.get('e', estimate)})
-    thread.start()
-    
-
-
-
+    # If no errors, kick job
+    if estimate.errors == "":
+        # Flag for running
+        estimate.estimation_running = True
+        # Start job in new Thread
+        thread = Thread(target=estimation.estimate_costs_wrapper, kwargs={'e': request.args.get('e', estimate)})
+        thread.start() 
+        
 
 
 @app.route("/logout")

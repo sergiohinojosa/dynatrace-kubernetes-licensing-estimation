@@ -1,11 +1,13 @@
 {% extends "base.html" %}
 
+
 {% block title %} Estimate {% endblock %}
 
 {% block body %}
 
-Data stored in the session:
-{% if estimate is not none %}
+
+{% if estimate.t_pod_h > 0 %}
+Results:
 <p> session Estimate mem: {{ estimate }} </p>
 <p> Tenant: {{ estimate.tenant_url}} </p>
 <p> K8s costs: {{ estimate.k8_costs}} </p>
@@ -15,42 +17,108 @@ Data stored in the session:
 <p> Total shortliving instances: {{ estimate.t_shortliving_instances}} </p>
 <p> Total instances: {{ estimate.t_instances}} </p>
 {% endif %}
-
 <p>
-    <p>Session UID {{ session.uid }} </p>
-</p>
+
+<p>Session UID {{ session.uid }} </p>
+
 
 {% if estimate.estimation_running %}
-Running.....
 
-<p>Tenant URL: {{ session.tenant_url }} </p>
-<p>API-Token: {{ session.api_token }} </p>
+Estimation is being generated for Tenant {{ estimate.tenant_url }}...
+
+please be patient
 
 {% else %}
-NOT Running, so lets print form
+
 <form action="/estimate" method="POST">
-    <div class="login">
-        <div class="login-screen">
-            <div class="app-title">
-                <h1>Estimate Kubernetes Usage</h1>
+    <div>
+        <h1>Estimate Kubernetes Usage</h1>
+    </div>
+    <div class="estimate-form">
+        <div class="control-group">
+
+            <div>
+                <label>
+                    <input type="radio" name="saasRadio" value="SaaS" checked="True">
+                    SaaS
+                </label>
+
+                <label>
+                    <input type="radio" name="saasRadio" value="Managed">
+                    Managed
+                </label>
             </div>
-            <div class="estimate-form">
-                <div class="control-group">
-                        <input type="tenant_url" name="tenant_url" placeholder="Tenant URL">
-                        <br>
-                        <input type="password" name="api_token" placeholder="API Token">
-                        <br>
-            </div>
-                    <input type="submit" value="Estimate costs" class="btn btn-primary btn-lg btn-block">
+            <div class="SaaS selectt">
+                <label for="tenant_url">Tenant URL</label>
+                <input type="text" name="tenant_url" placeholder="https://tenantid.live.dynatrace.com" size="60"  value="{{ estimate.tenant_url }}">
                 <br>
             </div>
-        </div>
-    </div>
-</form>
-    {% if estimate.errors %}
-    <p class=has-error><strong>There was an error:</strong> {{ estimate.errors }}</p>
-    {% endif %}
+            <div class="Managed selectt" style="display: none;">
+                <label for="tenant_url">Managed MC Url</label>
+                <input type="text" name="tenant_url" placeholder="https://{cluster-id}-{nodeNr}.managed.internal.dynatrace.com:8021/e/{managed-tenant-id}" size="80" value="{{ estimate.tenant_url }}">
+                <br>
+                <label for="ssoCSRFCookie">ssoCSRFCookie</label>
+                <input type="text" name="ssoCSRFCookie" placeholder="ssoCSRFCookie" value="{{ estimate.ssoCSRFCookie }}">
+                <br>
+                <label for="jsessionId">jsessionId</label>
+                <input type="text" name="jsessionId" placeholder="jsessionId" value="{{ estimate.jsessionId }}">
+                <br>
+            </div>
 
+            <label for="api_token">API Token</label>
+            <input type="password" name="api_token" placeholder="dt0c01.xxxxx..." size="50" value="{{ estimate.api_token }}">
+            <br>
+            <label for="resolution">Resolution:</label>
+            <input type="radio" name="resolution" id="15m">
+            <label for="15m">15 min</label>
+            <input type="radio" name="resolution" id="1h" checked="true">
+            <label for="1h">1 hour</label>
+            <input type="radio" name="resolution" id="6h">
+            <label for="6h">6 hours</label>
+            <input type="radio" name="resolution" id="1d">
+            <label for="6h">1 day</label>
+            <br>
+            <label for="iterations">Iterations</label>
+            <input type="text" name="iterations" placeholder="4"  value="{{ estimate.iterations }}">
+            <br>
+            <label for="days_per_iteration">Days per iteration</label>
+            <input type="text" name="days_per_iteration" placeholder="7" value="{{ estimate.days_per_iteration }}" >
+            <br>
+
+            <!--
+                <label for="price_pod_hour">Price POD hour</label>
+                <input type="text" name="price_pod_hour" placeholder="0.002" value="{{ estimate.price_pod_hour }}">
+                <br>
+                <label for="price_gib_hour">Price GIB hour</label>
+                <input type="text" name="price_gib_hour" placeholder="0.01" value="{{ estimate.price_gib_hour }}">
+            -->
+        </div>
+        <input type="submit" value="Estimate costs" class="btn btn-primary btn-lg btn-block">
+    </div>
+
+</form>
 {% endif %}
+
+{% if estimate.errors > '' %}
+<p class=has-error><strong>There was an error:</strong> {{ estimate.errors }}</p>
+{% endif %}
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("input[name$='saasRadio']").
+            click(
+                function () {
+                    const inputValue =
+                        $(this).attr("value");
+                    const targetBox =
+                        $("." + inputValue);
+                    $(".selectt").
+                        not(targetBox).hide();
+                    $(targetBox).show();
+                }
+            );
+    }); 
+</script>
 
 {% endblock %}

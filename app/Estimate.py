@@ -29,8 +29,8 @@ class Estimate:
         self.estimation_running = False
         
         # Managed Vars
-        self.ssoCSRFCookie = "xxx"
-        self.jsessionId = "xxx"
+        self.ssoCSRFCookie = ""
+        self.jsessionId = ""
 
         # Runtime
         self.iterative_query = True
@@ -58,7 +58,7 @@ class Estimate:
         # Dynamic Query
         # API V2 Endpoint for metric selection
         self.q_metric_selector_endpoint="/api/v2/metrics/query?metricSelector="
-        #
+
         # Query to fetch the avg size of K8s PGIs and the ammount of datapoints with a 
         # 15m resolution 
         self.query_body="""
