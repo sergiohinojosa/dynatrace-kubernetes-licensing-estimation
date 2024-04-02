@@ -52,8 +52,6 @@ def start_estimation(estimate):
     if estimate.tenant_url == "":
                 estimate.errors = "Please enter a valid Tenant url"
     
-    # Add in cache
-    set_user_cache(estimate)
 
     # If no errors, kick job
     if estimate.errors == "":
@@ -62,6 +60,9 @@ def start_estimation(estimate):
         # Start job in new Thread
         thread = Thread(target=estimation.estimate_costs_wrapper, kwargs={'e': request.args.get('e', estimate)})
         thread.start() 
+
+    # Add in cache
+    set_user_cache(estimate)
         
 
 
