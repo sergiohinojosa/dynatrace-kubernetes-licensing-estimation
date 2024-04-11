@@ -73,9 +73,9 @@ def do_get(e, endpoint):
         logging.debug("Using MC Cookies from config file")
         logging.debug("Node:%s", e.get_tenant_url())
         endpoint = endpoint + "&Api-Token " + e.get_api_token()
-        response = requests.get(e.get_tenant_url() + endpoint, headers=get_header_managed(e.get_api_token(), e.get_ssoCSRFCookie(), e.get_jsessionId()), verify=verify_request(), timeout=120)
+        response = requests.get(e.get_tenant_url() + endpoint, headers=get_header_managed(e.get_api_token(), e.get_ssoCSRFCookie(), e.get_jsessionId()), verify=verify_request(), timeout=180)
     else:
-        response = requests.get(e.get_tenant_url() + endpoint, headers=get_header(e.get_api_token()), verify=verify_request(), timeout=10)       
+        response = requests.get(e.get_tenant_url() + endpoint, headers=get_header(e.get_api_token()), verify=verify_request(), timeout=120)       
     logging.debug("GET Reponse content: %s - %s ", str(response.content), endpoint)
     return response
 
@@ -175,7 +175,7 @@ def estimate_costs_wrapper(e):
         e.set_estimation_running(False)
         e.errors = str(err)
         set_user_cache(e)
-        logging.error("There was an error: %s", e)
+        logging.error("There was an error: %s", err)
         return
     return
 

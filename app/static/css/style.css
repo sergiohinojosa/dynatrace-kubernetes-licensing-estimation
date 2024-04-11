@@ -5,10 +5,12 @@ html{
     -ms-text-size-adjust:100%;
     position: relative;
     min-height: 100%;
-}
-body{
+  }
+  body{
     margin-bottom: 60px;
     display: inline;
+    background-color: black;
+    color: white;
 }
 article,aside,details,figcaption,figure,footer,header,hgroup,main,menu,nav,section,summary{
     display:block

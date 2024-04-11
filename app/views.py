@@ -47,6 +47,13 @@ def start_estimation(estimate):
     estimate.errors = ""
     estimate.tenant_url = request.form['tenant_url']
     estimate.api_token = request.form['api_token'] 
+    
+    estimate.ssoCSRFCookie = request.form['ssoCSRFCookie'] 
+    estimate.jsessionId = request.form['jsessionId'] 
+    estimate.resolution = request.form['resolution'] 
+    estimate.from_timeframe = request.form['from_timeframe']
+    estimate.iterations = int(request.form['iterations']) 
+    estimate.days_per_iteration = int(request.form['days_per_iteration']) 
 
 
     if estimate.tenant_url == "":

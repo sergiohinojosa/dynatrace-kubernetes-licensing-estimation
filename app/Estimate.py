@@ -19,7 +19,6 @@ REPORT_DIR = "report"
 # GiBHour calculation  
 # https://docs.dynatrace.com/docs/manage/subscriptions-and-licensing/dynatrace-platform-subscription/host-monitoring#gib-hour-calculation-for-containers-and-application-only-monitoring
 
-
 class Estimate:
 
     def __init__(self, tenant_url, api_token, uid):
@@ -34,8 +33,8 @@ class Estimate:
 
         # Runtime
         self.iterative_query = True
-        self.from_timeframe = "2024-02-01"
-        self.to_timeframe = "2024-02-29"
+        self.from_timeframe = "2024-01-01"
+        self.to_timeframe = "2024-03-31"
         self.iterations = 4
         self.days_per_iteration = 7
 
@@ -97,7 +96,6 @@ class Estimate:
         # Put the parametrized Query together
         self.query_memory_static = self.q_metric_selector_endpoint + self.query_body + self.q_to_unit + self.q_resolution + self.q_from_t + self.q_to_t 
         self.query_memory_dyn = self.q_metric_selector_endpoint + self.query_body + self.q_to_unit + self.q_resolution  
-
 
 
     def get_tenant_url(self):
