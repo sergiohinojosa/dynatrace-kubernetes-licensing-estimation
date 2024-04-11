@@ -279,9 +279,9 @@ def do_get(endpoint):
         logging.debug("Using MC Cookies from config file")
         logging.debug("Node:%s", TENANT_URL)
         endpoint = endpoint + "&Api-Token " + API_TOKEN
-        response = requests.get(TENANT_URL + endpoint, headers=get_header_managed(), verify=verify_request(), timeout=120)
+        response = requests.get(TENANT_URL + endpoint, headers=get_header_managed(), verify=verify_request(), timeout=180)
     else:
-        response = requests.get(TENANT_URL + endpoint, headers=get_header(), verify=verify_request(), timeout=10)       
+        response = requests.get(TENANT_URL + endpoint, headers=get_header(), verify=verify_request(), timeout=120)       
     logging.debug("GET Reponse content: %s - %s ", str(response.content), endpoint)
     return response
 
