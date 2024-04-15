@@ -279,9 +279,9 @@ def do_get(endpoint):
         logging.debug("Using MC Cookies from config file")
         logging.debug("Node:%s", TENANT_URL)
         endpoint = endpoint + "&Api-Token " + API_TOKEN
-        response = requests.get(TENANT_URL + endpoint, headers=get_header_managed(), verify=verify_request(), timeout=120)
+        response = requests.get(TENANT_URL + endpoint, headers=get_header_managed(), verify=verify_request(), timeout=180)
     else:
-        response = requests.get(TENANT_URL + endpoint, headers=get_header(), verify=verify_request(), timeout=10)       
+        response = requests.get(TENANT_URL + endpoint, headers=get_header(), verify=verify_request(), timeout=120)       
     logging.debug("GET Reponse content: %s - %s ", str(response.content), endpoint)
     return response
 
@@ -360,15 +360,6 @@ def estimate_costs():
     # TODO Get Names in the payload
     pod_Queries = []
     mem_Queries = []
-
-    # TODO Get variables from WEB Session 
-    # or from Config
-
-    if session['logged_in']:
-        print(session['logged_in'])
-        print(session['tenant_url'])
-        print(session['api_token'])
-    #    return
 
     # We iterate the whole i times
     if iterative_query:
