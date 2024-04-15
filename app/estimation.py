@@ -18,8 +18,6 @@ from app.Query import Query
 
 # TODO Documentation
 
-# TODO Installation PIP Requirements
-
 class EmptyResponse:
     """Set an empty response with code"""
     status_code = 500

@@ -4,24 +4,8 @@ from threading import Thread
 from flask import Flask, render_template, redirect, url_for, request, session, abort, flash
 from .cache import *
 
-
-@app.route('/')
+@app.route('/', methods=['GET', 'POST'])
 def index():
-
-    # Get Cache for unique session, None if not available
-    estimate = get_init_user_cache_from_session()
-    return render_template('index.html', estimate=estimate)
-
-@app.route('/about')
-def about():
-    return render_template("about.html")
-
-@app.route('/contact')
-def contact():
-    return render_template("contact.html")
-
-@app.route('/estimate', methods=['GET', 'POST'])
-def estimate():
     error = None
     estimate = get_init_user_cache_from_session()
     
@@ -34,11 +18,24 @@ def estimate():
             start_estimation(estimate)
     else:
     # GET Handling
-        return render_template('estimate.html', error=error, estimate=estimate)
+        return render_template('index.html', error=error, estimate=estimate)
     
-    return render_template('estimate.html', error=error, estimate=estimate)
+    return render_template('index.html', error=error, estimate=estimate)
 
+@app.route('/about')
+def about():
+    return render_template("about.html")
 
+@app.route('/contact')
+def contact():
+    return render_template("contact.html")
+
+@app.route('/show_cache')
+def show_cache():
+
+    # Get Cache for unique session, None if not available
+    estimate = get_init_user_cache_from_session()
+    return render_template('cache.html', estimate=estimate)
 
 def start_estimation(estimate):
 

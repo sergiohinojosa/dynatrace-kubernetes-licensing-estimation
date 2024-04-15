@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Cache{% endblock %}
+
+{% block body %}
+<div class="jumbotron">
+  <h1>Showing the cache for this session</h1>
+  <p class="lead">Attributes</p>
+
+  Data stored in the Cache for this Session:
+  {% if estimate is not none %}
+  <p> session Estimate mem: {{ estimate }} </p>
+  <p> session Estimate values: {{ estimate.__dict__ }} </p>
+  {% endif %}
+
+
+</div>
+{% endblock %}
