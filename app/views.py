@@ -22,13 +22,15 @@ def index():
     
     return render_template('index.html', error=error, estimate=estimate)
 
-@app.route('/about')
+@app.route('/doc')
 def about():
-    return render_template("about.html")
+    estimate = get_init_user_cache_from_session()
+    return render_template("doc.html",  estimate=estimate)
 
-@app.route('/contact')
+@app.route('/help')
 def contact():
-    return render_template("contact.html")
+    estimate = get_init_user_cache_from_session()
+    return render_template("help.html",  estimate=estimate)
 
 @app.route('/show_cache')
 def show_cache():
