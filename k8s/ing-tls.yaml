@@ -1,0 +1,27 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+  name: k8stimator-ingress
+  namespace: k8stimator
+spec:
+  rules:
+  - host: k8stimator.whydevslovedynatrace.com
+    http:
+      paths:
+      - backend:
+          service:
+            name: k8stimator
+            port:
+              number: 8080
+        path: /
+        pathType: Prefix
+  tls:
+  - hosts:
+    - k8stimator.whydevslovedynatrace.com
+    secretName: k8stimator-tls

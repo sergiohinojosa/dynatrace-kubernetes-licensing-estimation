@@ -1,5 +1,5 @@
 # We use as base the latest nginx image
-FROM python:3.12.3-slim-bullseye
+FROM --platform=linux/amd64 python:3.12.3-slim-bullseye as build
 
 WORKDIR /flask-app
 

@@ -35,7 +35,7 @@ def show_cache():
 
     # Get Cache for unique session, None if not available
     estimate = get_init_user_cache_from_session()
-    return render_template('cache.html', estimate=estimate)
+    return render_template('show_cache.html', estimate=estimate)
 
 def start_estimation(estimate):
 
