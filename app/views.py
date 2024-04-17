@@ -41,8 +41,9 @@ def show_cache():
 
 def start_estimation(estimate):
 
-    # Reset Error
+    # Reset Error & Console
     estimate.errors = ""
+    estimate.console = ""
     
     estimate.tenant_url = request.form['tenant_url']
     estimate.api_token = request.form['api_token'] 

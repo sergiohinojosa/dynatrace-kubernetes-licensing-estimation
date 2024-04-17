@@ -74,14 +74,6 @@ please be patient
             <label for="days_per_iteration">Days per iteration</label>
             <input type="text" name="days_per_iteration" placeholder="7" value="{{ estimate.days_per_iteration }}">
             <br>
-
-            <!--
-                <label for="price_pod_hour">Price POD hour</label>
-                <input type="text" name="price_pod_hour" placeholder="0.002" value="{{ estimate.price_pod_hour }}">
-                <br>
-                <label for="price_gib_hour">Price GIB hour</label>
-                <input type="text" name="price_gib_hour" placeholder="0.01" value="{{ estimate.price_gib_hour }}">
-            -->
         </div>
         <input type="submit" value="Estimate costs" class="btn btn-primary btn-lg btn-block">
     </div>
@@ -90,21 +82,21 @@ please be patient
 {% endif %}
 
 
-
-<div>
-    {% if estimate.t_pod_h > 0 %}
-    Results:
-    <p> session Estimate mem: {{ estimate }} </p>
-    <p> Tenant: {{ estimate.tenant_url}} </p>
-    <p> K8s costs: {{ estimate.k8_costs}} </p>
-    <p> App costs: {{ estimate.app_costs}} </p>
-    <p> Total Pod Hours: {{ estimate.t_pod_h}} </p>
-    <p> Total Gib Hours: {{ estimate.t_gib_h}} </p>
-    <p> Total shortliving instances: {{ estimate.t_shortliving_instances}} </p>
-    <p> Total instances: {{ estimate.t_instances}} </p>
-    {% endif %}
-
+<br>
+{% if estimate.t_pod_h > 0 %} 
+<div class="console">
+    
+    Estimating costs for Tenant: {{ estimate.tenant_url}} <br>
+    --------------------------------------- <br>
+    Total Pod Hours: {{ estimate.t_pod_h}} <br>
+    Total Gib Hours: {{ estimate.t_gib_h}} <br>
+    Total shortliving instances: {{ estimate.t_shortliving_instances}} <br>
+    Total instances: {{ estimate.t_instances}}<br>
+    ---------------------------------------
+    {{ estimate.console | safe }}
+    
 </div>
+{% endif %}
 
 <script type="text/javascript">
     $(document).ready(function () {

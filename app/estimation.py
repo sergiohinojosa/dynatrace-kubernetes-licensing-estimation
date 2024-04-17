@@ -255,16 +255,32 @@ def estimate_costs(e):
         date_from = pod_query.get_date_from().strftime(conf.FORMAT_DATE)
         date_to = pod_query.get_date_to().strftime(conf.FORMAT_DATE)
         
-        l = " " + str(i + 1) + " of "+ str(e.days_per_iteration) +"d \t"+ date_from + " to " + date_to
+        line = "Iteration " + str(i + 1) + " of "+  str(e.iterations) + " with "+str(e.days_per_iteration) +"days - \t"+ date_from + " to " + date_to
 
         pod_h = pod_query.get_total_pod_hours()
         gib_h = mem_query.get_total_memory()
 
-        logging.info("%s\t%s pod-hours", l, f"{pod_h:,}")
-        logging.info("%s\t%s GiB-hours from %s pod instances",l , f"{gib_h:,}", f"{instances:,}")
-        logging.info("%s\t%s instances lived under %s vs a total of %s instances equals %s %%",l, f"{shortliving_instances:,}" , e.resolution, f"{instances:,}", ("%.3f" % percentage_shortliving))
-        logging.info("")
 
+        # Write to Log and UI
+        e.console = e.console + "<br>" + line
+        logging.info(line)
+
+
+        m_podh = "POD-Hours: {}".format( f"{pod_h:,}")
+        e.console = e.console + "<br>" + m_podh
+        logging.info(m_podh)
+
+        m_gibh = "GiB-Hours: {}\t from {} pod instances".format(f"{gib_h:,}", f"{instances:,}")
+        e.console = e.console + "<br>" + m_gibh
+        logging.info(m_gibh)
+
+        m_shortlive = "Shortliving instances: {} instances lived under {} vs a total of {} instances equals {} percent".format(f"{shortliving_instances:,}" , e.resolution, f"{instances:,}", ("%.3f" % percentage_shortliving))
+        e.console = e.console + "<br>" + m_shortlive
+        logging.info(m_shortlive)
+
+        logging.info("")
+        e.console = e.console + "<br>"
+   
         e.t_pod_h = e.t_pod_h + pod_h
         e.t_gib_h = e.t_gib_h + gib_h
         e.t_instances = e.t_instances + instances
@@ -277,6 +293,7 @@ def estimate_costs(e):
         qr.date_to = date_to
         qr.pod_h = pod_h
         qr.gib_h = gib_h
+        
         #TODO Get warning from issue? or add warning if no more
         qr.warning= "No warning"
         #TODO Get Resolution? 

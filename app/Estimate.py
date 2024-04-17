@@ -70,6 +70,7 @@ class Estimate:
         self.k8_costs = 0
         self.app_costs = 0
         self.errors = ""
+        self.console = ""
 
         # Dynamic Query
         # API V2 Endpoint for metric selection
