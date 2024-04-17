@@ -41,9 +41,9 @@ def show_cache():
 
 def start_estimation(estimate):
 
-    # TODO Validate all Form Fields
-    # reset values
+    # Reset Error
     estimate.errors = ""
+    
     estimate.tenant_url = request.form['tenant_url']
     estimate.api_token = request.form['api_token'] 
     
@@ -52,25 +52,30 @@ def start_estimation(estimate):
     estimate.resolution = request.form['resolution'] 
     estimate.from_timeframe = request.form['from_timeframe']
     estimate.iterations = int(request.form['iterations']) 
-    estimate.days_per_iteration = int(request.form['days_per_iteration']) 
+    estimate.days_per_iteration = int(request.form['days_per_iteration'])
 
+    try:
+        # Validate all fields, on error we raise
+        estimate.validate_form_fields()
 
-    if estimate.tenant_url == "":
-                estimate.errors = "Please enter a valid Tenant url"
-    
-
-    # If no errors, kick job
-    if estimate.errors == "":
         # Flag for running
         estimate.estimation_running = True
-        # Start job in new Thread
-        thread = Thread(target=estimation.estimate_costs_wrapper, kwargs={'e': request.args.get('e', estimate)})
-        thread.start() 
 
-    # Add in cache
-    set_user_cache(estimate)
+        # Add in cache
+        set_user_cache(estimate)
         
+        # Start Job in new Thread
+        thread = Thread(target=estimation.estimate_costs_wrapper, kwargs={'e': request.args.get('e', estimate)})
+        thread.start()
 
+    except SyntaxWarning as war:
+        estimate.estimation_running = False
+        estimate.errors = str(war)
+        logging.error("There was a %s error: %s", type(war), war)
+    return
+         
+
+        
 
 @app.route("/logout")
 def logout():

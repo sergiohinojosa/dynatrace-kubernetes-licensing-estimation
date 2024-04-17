@@ -105,27 +105,32 @@ def validate_query(e, query, action, defaultvalue=''):
             logging.error("%s:warnings in the response:%s", action, warnings)
         except KeyError:
             logging.debug("No warnings in the response")
-        except json.decoder.JSONDecodeError:
+        except json.decoder.JSONDecodeError as err:
             if conf.MANAGED_DNS in e.get_tenant_url():
                 logging.error("Please make sure that you have set the proper Mission Control Cookies 'ssoCSRFCookie' 'JSESSIONID'")
                 logging.error("and you have established a connection to the Cluster via MC.")
                 query.has_issues()
-                return False
+                raise err
             else:
                 # raise uknown e
                 query.has_issues()
-                raise
+                raise err
     
         logging.debug("Total Count:%s, response_resolution:%s, dataPointCountRatio:%s, dimensionCountRatio:%s, nextPageKey:%s",totalCount,response_resolution, dataPointCountRatio, dimensionCountRatio, nextPageKey)
         
         if e.resolution != response_resolution:
+            query.has_issues()
+            #TODO Add Warning in a Query Object
             logging.warning("The response resolution of %s does not match the requested resolution %s", response_resolution, e.resolution)
     
     else:
         result = str(response.status_code)
-        logging.warning("%s :\t code:%s reason:%s  Content:%s", action, result, response.reason, str(response.content))
+        msg = "{} :\t code:{} reason:{}  Content:{}".format( action, result, response.reason, response.content)
+        logging.warning(msg)
         query.has_issues()
         status = False
+        # Exception will be handled by the Flask Framework
+        raise Exception(msg)
 
     logging.debug("%s:%s",action,result)
     logging.debug("%s:%s Content:%s",action, result, str(response.content))
@@ -147,33 +152,30 @@ def estimate_podhours(e, podQuery):
 
     return
 
-def do_work(e):
-
-    e.estimation_running = True
-    print("sleeping")
-    time.sleep(20)
-    e.estimation_running = False
-    e.k8_costs = 1000
-    set_user_cache(e)
-    print("woke up and adding to cache")
-    return
-
 
 def estimate_costs_wrapper(e):
     """Wrapper function for estimate_costs for effective error handling"""
-    e.set_estimation_running(True)
-    logging.info("Calculating estimation for tenant: %s and session %s", e.tenant_url, e.uid)
-    try:
+    try:    
+        e.set_estimation_running(True)
+        logging.info("Calculating estimation for tenant: %s and session %s", e.tenant_url, e.uid)
+        
+        # All fields will be validated, in an Error an Exception will be raised
+        e.validate_form_fields()
+
+        # Run logic for all queries
         estimate_costs(e)
-        # Set all ok
+        
+        # Everything was ok
         e.set_estimation_running(False)
-        # No errors    
+        
+        # No errors
         set_user_cache(e)
+
     except Exception as err:
         e.set_estimation_running(False)
         e.errors = str(err)
         set_user_cache(e)
-        logging.error("There was an error: %s", err)
+        logging.error("There was a %s error: %s", type(err), err)
         return
     return
 
@@ -234,6 +236,9 @@ def estimate_costs(e):
     for i in range(actual_i):
         # Calculate the POD-hours
         pod_query = pod_Queries[i]
+
+        qr = Estimate.QueryResult()
+        
         estimate_podhours(e, pod_query)
         if pod_query.had_issues():
             # If there is an issue with this query we go out.
@@ -243,7 +248,6 @@ def estimate_costs(e):
         mem_query = mem_Queries[i]
         estimate_memory(e, mem_query)
     
-        # write_report(memQuery.get_pgis(), memQuery.get_total_memory())
         instances = len(mem_query.get_pgis())
         shortliving_instances = len(mem_query.get_shortliving_pgis())
         percentage_shortliving = 100 * float(shortliving_instances)/float(instances)
@@ -265,6 +269,21 @@ def estimate_costs(e):
         e.t_gib_h = e.t_gib_h + gib_h
         e.t_instances = e.t_instances + instances
         e.t_shortliving_instances = e.t_shortliving_instances + shortliving_instances
+
+        qr.instances = instances
+        qr.shortliving_instances = shortliving_instances
+        qr.percentage_shortliving = percentage_shortliving
+        qr.date_from = date_from
+        qr.date_to = date_to
+        qr.pod_h = pod_h
+        qr.gib_h = gib_h
+        #TODO Get warning from issue? or add warning if no more
+        qr.warning= "No warning"
+        #TODO Get Resolution? 
+
+        e.queryresult.append(qr)
+        set_user_cache(e)
+
         
     e.k8_costs= e.t_pod_h * e.price_pod_hour
     e.app_costs= e.t_gib_h * e.price_gib_hour

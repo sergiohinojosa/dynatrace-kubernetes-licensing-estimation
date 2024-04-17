@@ -10,8 +10,8 @@
 
 {% if estimate.errors > '' %}
 
-<div class="error">    
-    <p><strong style="color: black;">⚠️ There was an error:  </strong>{{ estimate.errors }}</p>
+<div class="error">
+    <p><strong style="color: black;">⚠️ There was an error: </strong>{{ estimate.errors }}</p>
 </div>
 {% endif %}
 
@@ -39,15 +39,19 @@ please be patient
             </div>
             <div class="SaaS selectt">
                 <label for="tenant_url">Tenant URL</label>
-                <input type="text" name="tenant_url" placeholder="https://tenantid.live.dynatrace.com" size="100%"  value="{{ estimate.tenant_url }}">
+                <input type="text" name="tenant_url" placeholder="https://tenantid.live.dynatrace.com" size="100%"
+                    value="{{ estimate.tenant_url }}">
                 <br>
             </div>
             <div class="Managed selectt" style="display: none;">
                 <label for="tenant_url">Managed MC Url</label>
-                <input type="text" name="tenant_url" placeholder="https://{cluster-id}-{nodeNr}.managed.internal.dynatrace.com:8021/e/{managed-tenant-id}" size="100%" value="{{ estimate.tenant_url }}">
+                <input type="text" name="tenant_url"
+                    placeholder="https://{cluster-id}-{nodeNr}.managed.internal.dynatrace.com:8021/e/{managed-tenant-id}"
+                    size="100%" value="{{ estimate.tenant_url }}">
                 <br>
                 <label for="ssoCSRFCookie">ssoCSRFCookie</label>
-                <input type="text" name="ssoCSRFCookie" placeholder="ssoCSRFCookie" value="{{ estimate.ssoCSRFCookie }}">
+                <input type="text" name="ssoCSRFCookie" placeholder="ssoCSRFCookie"
+                    value="{{ estimate.ssoCSRFCookie }}">
                 <br>
                 <label for="jsessionId">jsessionId</label>
                 <input type="text" name="jsessionId" placeholder="jsessionId" value="{{ estimate.jsessionId }}">
@@ -55,19 +59,20 @@ please be patient
             </div>
 
             <label for="api_token">API Token</label>
-            <input type="password" name="api_token" placeholder="dt0c01.xxxxx..." size="100%" value="{{ estimate.api_token }}">
+            <input type="password" name="api_token" placeholder="dt0c01.xxxxx..." size="100%"
+                value="{{ estimate.api_token }}">
             <br>
             <label for="resolution">Resolution</label>
-            <input type="text" name="resolution" placeholder="1h"  value="{{ estimate.resolution }}">
+            <input type="text" name="resolution" placeholder="1h" value="{{ estimate.resolution }}">
             <br>
             <label for="from_timeframe">From Timeframe</label>
-            <input type="text" name="from_timeframe" placeholder="YYYY-MM-DD"  value="{{ estimate.from_timeframe }}">       
+            <input type="text" name="from_timeframe" placeholder="YYYY-MM-DD" value="{{ estimate.from_timeframe }}">
             <br>
             <label for="iterations">Iterations</label>
-            <input type="text" name="iterations" placeholder="4"  value="{{ estimate.iterations }}">
+            <input type="text" name="iterations" placeholder="4" value="{{ estimate.iterations }}">
             <br>
             <label for="days_per_iteration">Days per iteration</label>
-            <input type="text" name="days_per_iteration" placeholder="7" value="{{ estimate.days_per_iteration }}" >
+            <input type="text" name="days_per_iteration" placeholder="7" value="{{ estimate.days_per_iteration }}">
             <br>
 
             <!--

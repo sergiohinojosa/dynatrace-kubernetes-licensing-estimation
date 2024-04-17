@@ -8,95 +8,94 @@
   <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
 
   <!-- Pure Form -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/purecss@3.0.0/build/pure-min.css" integrity="sha384-X38yfunGUhNzHpBaEBsWLO+A0HDYOQi8ufWDkZ0k9e0eXz/tH3II7uKZ9msv++Ls" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/purecss@3.0.0/build/pure-min.css"
+    integrity="sha384-X38yfunGUhNzHpBaEBsWLO+A0HDYOQi8ufWDkZ0k9e0eXz/tH3II7uKZ9msv++Ls" crossorigin="anonymous">
 
-  <!-- Rajdhani google font -->  
+  <!-- Rajdhani google font -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Rajdhani">
-    
-<!-- Bootstrap core CSS -->
+
+  <!-- Bootstrap core CSS -->
   <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
 
   <!-- NOT USED
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
   -->
-
   <!-- jQuery and Popper.js -->
   <!-- 
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js" integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut" crossorigin="anonymous"></script>
   -->
-    <!-- Add a favicon -->
-    <link rel="icon" type="image/x-icon" href="https://dt-cdn.net/images/favicon-48x48-transparent-48-9b4df9c769.png">
+  <!-- Add a favicon -->
+  <link rel="icon" type="image/x-icon" href="https://dt-cdn.net/images/favicon-48x48-transparent-48-9b4df9c769.png">
 
-      <style>
-        html,
-        body,
-        jumbotron,
-        article,
-        aside,
-        details,
-        figcaption,
-        figure,
-        footer,
-        header,
-        hgroup,
-        main,
-        menu,
-        nav,
-        section,
-        summary {
-          font-family: 'Rajdhani', sans-serif;
-        }
+  <style>
+    html,
+    body,
+    jumbotron,
+    article,
+    aside,
+    details,
+    figcaption,
+    figure,
+    footer,
+    header,
+    hgroup,
+    main,
+    menu,
+    nav,
+    section,
+    summary {
+      font-family: 'Rajdhani', sans-serif;
+    }
 
-        
-        label {
-          width: 130px;
-          
-        }
 
-        input {
-          width: auto;
-          
-        }
+    label {
+      width: 130px;
 
-        .error {
+    }
 
-          color: #e63909;
-          background-color:#ffff96;
-          width: fit-content;
-          height: fit-content;
-        }
-        
-    </style> 
-      
-    </head>
+    input {
+      width: auto;
+
+    }
+    
+    .error {
+      color: #e63909;
+      background-color: #ffff96;
+      width: fit-content;
+      height: fit-content;
+    }
+  </style>
+
+</head>
 
 <body>
-  <div  style="text-align: center;"> 
-    <a href="/">Estimate</a> 
+  <div style="text-align: center;">
+    <a href="/">Estimate</a>
     <a href="/doc">Documentation</a>
     <a href="/help">Contact</a>
   </div>
 
   <div class="container">
 
-  {% if estimate.estimation_running %}
-  <script>
-    function autoRefresh() {
+    {% if estimate.estimation_running %}
+    <script>
+      function autoRefresh() {
         window.location = window.location.href;
-    }
-    setInterval('autoRefresh()', 2000);
-</script>
-  <div style="max-width: fit-content; margin-left: auto; margin-right: auto;">
-    <img src="https://cdn.pixabay.com/animation/2023/10/08/03/19/03-19-26-213_512.gif" alt="Loading" width="80" height="80"> Fetching data...
-  </div>
+      }
+      setInterval('autoRefresh()', 2000);
+    </script>
+    <div style="max-width: fit-content; margin-left: auto; margin-right: auto;">
+      <img src="https://cdn.pixabay.com/animation/2023/10/08/03/19/03-19-26-213_512.gif" alt="Loading" width="80"
+        height="80"> Fetching data...
+    </div>
 
-  {% endif %}
+    {% endif %}
 
     {% block body %}
     {% endblock %}
   </div> <!-- /container -->
-  
+
   <br>
   <br>
   <footer class="container" style="text-align: center;">© 2024 Dynatrace - Solution Engineering</footer>

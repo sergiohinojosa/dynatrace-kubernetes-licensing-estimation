@@ -19,6 +19,20 @@ REPORT_DIR = "report"
 # GiBHour calculation  
 # https://docs.dynatrace.com/docs/manage/subscriptions-and-licensing/dynatrace-platform-subscription/host-monitoring#gib-hour-calculation-for-containers-and-application-only-monitoring
 
+
+class QueryResult:
+    def __init__(self):
+        self.instances = 0
+        self.shortliving_instances = 0
+        self.percentage_shortliving = 0
+        self.date_from = ""
+        self.date_to = ""
+        self.pod_h = 0
+        self.gib_h = 0
+        self.warning = ""
+        self.resolution = ""
+
+
 class Estimate:
 
     def __init__(self, tenant_url, api_token, uid):
@@ -27,6 +41,9 @@ class Estimate:
         self.uid = uid
         self.estimation_running = False
         
+        # QueryResults
+        self.queryresult = []
+
         # Managed Vars
         self.ssoCSRFCookie = ""
         self.jsessionId = ""
@@ -131,3 +148,31 @@ class Estimate:
         
     def set_jsessionId(self, jsessionId):
         self.jsessionId = jsessionId
+
+
+    def validate_form_fields(self):
+
+        if not ("https://") in self.tenant_url:
+            raise SyntaxWarning("Tenant URL needs to contain HTTPS")
+        
+        if ("apps.dynatrace.com") in self.tenant_url:
+            raise SyntaxWarning("Please change the Tenant URL subdomain 'apps' -> 'live'")
+        
+        if not any(value in self.tenant_url for value in ('.live.dynatrace.com' or '.sprint.dynatracelabs.com' or 'managed.internal.dynatrace.com')):
+            raise SyntaxWarning("Tenant URL does not contain a valid (sub)domain for querying the API. See the documentation.")
+
+        if not any(value in self.resolution for value in('15m', '1h' , '6h',  '1d')):
+            raise SyntaxWarning("Valid resolution tipes are 15m, 1h, 6h, 1d")
+        
+        if not ("dt0c01.") in self.api_token:
+            raise SyntaxWarning("API Token does not contain a valid format")
+       
+        if self.iterations >= 30:
+            raise SyntaxWarning("Really? Do you want to iterate more than 30 times?")
+    
+        if self.days_per_iteration >= 31:
+            raise SyntaxWarning("Really? Do you want to iterate more than 31 days per iteration?")
+        
+        #TODO Validate timeframe format
+        #TODO Validate to timeframe with iterations
+        #self.from_timeframe
