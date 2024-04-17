@@ -2,6 +2,9 @@
 
 > **DISCLAIMER**: This project is not an official Dynatrace project and is not complete, nor supported. It's publishment is only intended for helping others calculate license estimations for Kubernetes Clusters.
 
+For Calculations please use this
+# https://k8stimator.whydevslovedynatrace.com/
+
 
 # License estimation for
 

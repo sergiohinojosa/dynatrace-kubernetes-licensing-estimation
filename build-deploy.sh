@@ -1,7 +1,15 @@
 #!/bin/bash
 
- docker build --tag shinojosa/k8stimator:0.3 . 
+name="k8stimator"
+version=0.4
+image="shinojosa/$name:$version"
 
- docker image push shinojosa/k8stimator:0.3
+deployment=$name
+container=$image
+ns=$name
 
-kubectl set image deployment/k8stimator k8stimator=shinojosa/k8stimator:0.3 -n k8stimator
+docker build --tag $image . 
+
+docker image push $image
+
+kubectl set image deployment/$deployment $name=$container -n $ns
