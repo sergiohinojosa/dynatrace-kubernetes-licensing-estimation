@@ -3,56 +3,73 @@
 
 <head>
   <title>{% block title %}{% endblock %}</title>
-  <!-- Rajdhani google font -->
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Rajdhani">
-  <!-- Bootstrap core CSS -->
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
-  <!-- jQuery and Popper.js -->
-  <!--
+
+  <!-- Pure Form -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/purecss@3.0.0/build/pure-min.css" integrity="sha384-X38yfunGUhNzHpBaEBsWLO+A0HDYOQi8ufWDkZ0k9e0eXz/tH3II7uKZ9msv++Ls" crossorigin="anonymous">
+
+  <!-- Rajdhani google font -->  
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Rajdhani">
+    
+<!-- Bootstrap core CSS -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+
+  <!-- NOT USED
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
   -->
+
+  <!-- jQuery and Popper.js -->
+  <!-- 
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js" integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut" crossorigin="anonymous"></script>
-
+  -->
     <!-- Add a favicon -->
-        <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
-  <style>
-    html,
-    body,
-    jumbotron,
-    article,
-    aside,
-    details,
-    figcaption,
-    figure,
-    footer,
-    header,
-    hgroup,
-    main,
-    menu,
-    nav,
-    section,
-    summary {
-      font-family: 'Rajdhani', sans-serif;
-    }
-    
+    <link rel="icon" type="image/x-icon" href="https://dt-cdn.net/images/favicon-48x48-transparent-48-9b4df9c769.png">
 
-      .selectt {
-        padding: 10px;
-        margin-top: 10px;
-        width: 60%;
+      <style>
+        html,
+        body,
+        jumbotron,
+        article,
+        aside,
+        details,
+        figcaption,
+        figure,
+        footer,
+        header,
+        hgroup,
+        main,
+        menu,
+        nav,
+        section,
+        summary {
+          font-family: 'Rajdhani', sans-serif;
         }
-    
-    label {
-        width: 130px;
-       
-    }
-    input {
-      size: 100;
 
-    }
-  </style> 
-</head>
+        
+        label {
+          width: 130px;
+          
+        }
+
+        input {
+          width: auto;
+          
+        }
+
+        .error {
+
+          color: #e63909;
+          background-color:#ffff96;
+          width: fit-content;
+          height: fit-content;
+        }
+        
+    </style> 
+      
+    </head>
 
 <body>
   <div  style="text-align: center;"> 
@@ -75,24 +92,13 @@
   </div>
 
   {% endif %}
-  <!--
-    <div class="header clearfix">
-      <nav>
-        <ul class="nav nav-pills pull-right">
-          <li role="presentation"><a href="/">Home</a></li>
-          <li role="presentation"><a href="/about">About </a></li>
-          <li role="presentation"><a href="/contact">Contact</a></li>
-          {% if session['logged_in'] == True %}
-          <li role="presentation"><a href="/logout">Logout</a></li>
-          {% endif %}
-        </ul>
-      </nav>
-    </div>
--->
 
     {% block body %}
     {% endblock %}
   </div> <!-- /container -->
+  
+  <br>
+  <br>
   <footer class="container" style="text-align: center;">© 2024 Dynatrace - Solution Engineering</footer>
 
 </body>

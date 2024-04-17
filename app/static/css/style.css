@@ -2513,8 +2513,13 @@ select[multiple].input-lg,textarea.input-lg{
 .has-warning .form-control-feedback{
     color:#8a6d3b
 }
+
+.has-error {
+    color:#a94442;
+    background-color: yellow;
+}
 .has-error .checkbox,.has-error .checkbox-inline,.has-error .control-label,.has-error .help-block,.has-error .radio,.has-error .radio-inline,.has-error.checkbox label,.has-error.checkbox-inline label,.has-error.radio label,.has-error.radio-inline label{
-    color:#a94442
+    color:#a94442;
 }
 .has-error .form-control{
     border-color:#a94442;
