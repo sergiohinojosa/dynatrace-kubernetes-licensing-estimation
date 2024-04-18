@@ -16,8 +16,6 @@ from app import Estimate as conf
 from app.PGI import PGI
 from app.Query import Query
 
-# TODO Documentation
-
 class EmptyResponse:
     """Set an empty response with code"""
     status_code = 500
@@ -33,15 +31,6 @@ def check_create_dir(dir_name):
 # Create log directory at initialization
 check_create_dir(conf.LOG_DIR)
 
-check_create_dir(conf.REPORT_DIR)
-
-# Initialize logging
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                    filename=conf.LOG_DIR + '/' + conf.LOG_FILE,
-                    level=logging.INFO)
-
-# Add logging also to the console of the running program
-logging.getLogger().addHandler(logging.StreamHandler())
 
 def get_header_json():
     """Header builder as json"""
@@ -266,15 +255,15 @@ def estimate_costs(e):
         logging.info(line)
 
 
-        m_podh = "POD-Hours: {}".format( f"{pod_h:,}")
+        m_podh = "POD-Hours:\t{}".format( f"{pod_h:,}")
         e.console = e.console + "<br>" + m_podh
         logging.info(m_podh)
 
-        m_gibh = "GiB-Hours: {}\t from {} pod instances".format(f"{gib_h:,}", f"{instances:,}")
+        m_gibh = "GiB-Hours:\t{} from {} pod instances".format(f"{gib_h:,}", f"{instances:,}")
         e.console = e.console + "<br>" + m_gibh
         logging.info(m_gibh)
 
-        m_shortlive = "Shortliving instances: {} instances lived under {} vs a total of {} instances equals {} percent".format(f"{shortliving_instances:,}" , e.resolution, f"{instances:,}", ("%.3f" % percentage_shortliving))
+        m_shortlive = "Shortliving instances:\t{} instances lived under {} vs a total of {} instances equals {} percent".format(f"{shortliving_instances:,}" , e.resolution, f"{instances:,}", ("%.3f" % percentage_shortliving))
         e.console = e.console + "<br>" + m_shortlive
         logging.info(m_shortlive)
 
@@ -293,7 +282,7 @@ def estimate_costs(e):
         qr.date_to = date_to
         qr.pod_h = pod_h
         qr.gib_h = gib_h
-        
+
         #TODO Get warning from issue? or add warning if no more
         qr.warning= "No warning"
         #TODO Get Resolution? 
