@@ -29,7 +29,7 @@ class QueryResult:
         self.date_to = ""
         self.pod_h = 0
         self.gib_h = 0
-        self.warning = ""
+        self.warning = []
         self.resolution = ""
 
 

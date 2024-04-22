@@ -8,7 +8,6 @@ class Query:
         self.pgis = {}
         self.shortliving_pgis = []
         self.total_memory = 0
-        self.issues = False
         self.total_pod_hours = 0
         self.date_from = None
         self.date_to = None
@@ -46,12 +45,6 @@ class Query:
     
     def set_total_memory(self, total_memory):
         self.total_memory = total_memory
-    
-    def had_issues(self):
-        return self.issues
-    
-    def has_issues(self):
-        self.issues = True
 
     def get_total_pod_hours(self):
         return self.total_pod_hours

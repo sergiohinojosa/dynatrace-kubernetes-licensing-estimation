@@ -69,7 +69,6 @@ def do_get(e, endpoint):
 def validate_query(e, query, action, defaultvalue=''):
     """Validate response and payload"""
     result = defaultvalue
-    status = True
     response = query.get_response()
     json_payload = query.get_json_payload()
 
@@ -78,7 +77,6 @@ def validate_query(e, query, action, defaultvalue=''):
         if not defaultvalue:
             result = response.reason
 
-        status = True
         try:
             json_payload = json.loads(response.text)
             query.set_json_payload(json_payload)
@@ -90,40 +88,35 @@ def validate_query(e, query, action, defaultvalue=''):
             dimensionCountRatio = json_payload['result'][0]['dimensionCountRatio']
     
             warnings = json_payload['warnings']
-            query.set_warnings(warnings)
-            logging.error("%s:warnings in the response:%s", action, warnings)
+            query.warnings.append(warnings)
+            logging.warning("%s:warnings in the response:%s", action, warnings)
         except KeyError:
             logging.debug("No warnings in the response")
         except json.decoder.JSONDecodeError as err:
             if conf.MANAGED_DNS in e.get_tenant_url():
                 logging.error("Please make sure that you have set the proper Mission Control Cookies 'ssoCSRFCookie' 'JSESSIONID'")
                 logging.error("and you have established a connection to the Cluster via MC.")
-                query.has_issues()
                 raise err
             else:
-                # raise uknown e
-                query.has_issues()
+                # raise uknown e, handled by wrapper
                 raise err
     
         logging.debug("Total Count:%s, response_resolution:%s, dataPointCountRatio:%s, dimensionCountRatio:%s, nextPageKey:%s",totalCount,response_resolution, dataPointCountRatio, dimensionCountRatio, nextPageKey)
         
         if e.resolution != response_resolution:
-            query.has_issues()
-            #TODO Add Warning in a Query Object
-            logging.warning("The response resolution of %s does not match the requested resolution %s", response_resolution, e.resolution)
+            warn_msg = "The response resolution of {} does not match the requested resolution {}".format(response_resolution, e.resolution)
+            query.warnings.append(warn_msg)
+            logging.warning(warn_msg)
     
     else:
         result = str(response.status_code)
         msg = "{} :\t code:{} reason:{}  Content:{}".format( action, result, response.reason, response.content)
         logging.warning(msg)
-        query.has_issues()
-        status = False
-        # Exception will be handled by the Flask Framework
+        # Exception will be handled by the wrapper
         raise Exception(msg)
 
     logging.debug("%s:%s",action,result)
     logging.debug("%s:%s Content:%s",action, result, str(response.content))
-    return status
 
 def estimate_podhours(e, podQuery):
     """Function to calculate the pod hours"""
@@ -131,8 +124,8 @@ def estimate_podhours(e, podQuery):
     podQuery.set_response(do_get(e, podQuery.get_query()))
 
     # Validate response
-    if not validate_query(e, podQuery, "Query [builtin:kubernetes.pods] status"):
-        return
+    validate_query(e, podQuery, "Query [builtin:kubernetes.pods] status")
+        
 
     # Work with the payload
     # TODO Finish the calculation by NS for doing a report
@@ -229,9 +222,6 @@ def estimate_costs(e):
         qr = Estimate.QueryResult()
         
         estimate_podhours(e, pod_query)
-        if pod_query.had_issues():
-            # If there is an issue with this query we go out.
-            return
         
         # Calculate the Gib-hours
         mem_query = mem_Queries[i]
@@ -258,10 +248,17 @@ def estimate_costs(e):
         m_podh = "POD-Hours:\t{}".format( f"{pod_h:,}")
         e.console = e.console + "<br>" + m_podh
         logging.info(m_podh)
+        if len(pod_query.warnings) > 0:
+            logging.warning(str(pod_query.warnings))
+            e.console = e.console + "<br>Warning, the previous query is not accurate due:" + str(pod_query.warnings)
+
 
         m_gibh = "GiB-Hours:\t{} from {} pod instances".format(f"{gib_h:,}", f"{instances:,}")
         e.console = e.console + "<br>" + m_gibh
         logging.info(m_gibh)
+        if len(mem_query.warnings) > 0:
+            logging.warning(str(mem_query.warnings))
+            e.console = e.console + "<br>Warning, the previous query is not accurate due:" + str(mem_query.warnings)
 
         m_shortlive = "Shortliving instances:\t{} instances lived under {} vs a total of {} instances equals {} percent".format(f"{shortliving_instances:,}" , e.resolution, f"{instances:,}", ("%.3f" % percentage_shortliving))
         e.console = e.console + "<br>" + m_shortlive
@@ -270,6 +267,7 @@ def estimate_costs(e):
         logging.info("")
         e.console = e.console + "<br>"
    
+        # SUM Consumption
         e.t_pod_h = e.t_pod_h + pod_h
         e.t_gib_h = e.t_gib_h + gib_h
         e.t_instances = e.t_instances + instances
@@ -282,10 +280,6 @@ def estimate_costs(e):
         qr.date_to = date_to
         qr.pod_h = pod_h
         qr.gib_h = gib_h
-
-        #TODO Get warning from issue? or add warning if no more
-        qr.warning= "No warning"
-        #TODO Get Resolution? 
 
         e.queryresult.append(qr)
         set_user_cache(e)
@@ -311,8 +305,7 @@ def estimate_memory(e, memQuery):
     memQuery.set_response(do_get(e, memQuery.get_query()))
 
     # Validate response
-    if not validate_query(e, memQuery, "Query [builtin:tech.generic.mem.workingSetSize] status"):
-        return
+    validate_query(e, memQuery, "Query [builtin:tech.generic.mem.workingSetSize] status")
     
     json_payload = memQuery.get_json_payload()
     pgis = memQuery.get_pgis()

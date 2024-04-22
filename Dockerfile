@@ -17,4 +17,6 @@ COPY app app
 
 COPY lib lib
 
+RUN mkdir log 
+
 CMD ["python3", "run.py"]
