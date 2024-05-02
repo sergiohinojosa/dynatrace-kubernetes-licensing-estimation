@@ -1,0 +1,46 @@
+apiVersion: v1
+items:
+- apiVersion: networking.k8s.io/v1
+  kind: Ingress
+  metadata:
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"networking.k8s.io/v1","kind":"Ingress","metadata":{"annotations":{"cert-manager.io/cluster-issuer":"letsencrypt-prod","kubernetes.io/ingress.class":"nginx","nginx.ingress.kubernetes.io/rewrite-target":"/","nginx.ingress.kubernetes.io/ssl-passthrough":"true","nginx.ingress.kubernetes.io/ssl-redirect":"true"},"name":"k8stimator-ingress","namespace":"k8stimator"},"spec":{"rules":[{"host":"k8stimator.whydevslovedynatrace.com","http":{"paths":[{"backend":{"service":{"name":"k8stimator","port":{"number":8080}}},"path":"/","pathType":"Prefix"}]}}],"tls":[{"hosts":["k8stimator.whydevslovedynatrace.com"],"secretName":"k8stimator-tls"}]}}
+      kubernetes.io/ingress.class: nginx
+      nginx.ingress.kubernetes.io/affinity: "cookie"
+      nginx.ingress.kubernetes.io/session-cookie-name: "k8stimator"
+      nginx.ingress.kubernetes.io/session-cookie-expires: "172800"
+      nginx.ingress.kubernetes.io/session-cookie-max-age: "172800"
+      nginx.ingress.kubernetes.io/rewrite-target: /
+      nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+      nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    creationTimestamp: "2024-04-16T18:18:01Z"
+    generation: 1
+    name: k8stimator-ingress
+    namespace: k8stimator
+    resourceVersion: "105987114"
+    uid: 1195a0af-0f9a-4135-81db-f9a659877e80
+  spec:
+    rules:
+    - host: k8stimator.whydevslovedynatrace.com
+      http:
+        paths:
+        - backend:
+            service:
+              name: k8stimator
+              port:
+                number: 8080
+          path: /
+          pathType: Prefix
+    tls:
+    - hosts:
+      - k8stimator.whydevslovedynatrace.com
+      secretName: k8stimator-tls
+  status:
+    loadBalancer:
+      ingress:
+      - ip: 34.118.0.68
+kind: List
+metadata:
+  resourceVersion: ""

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 name="k8stimator"
-version=0.9
+version=0.11
 image="shinojosa/$name:$version"
 
 deployment=$name

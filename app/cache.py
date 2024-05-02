@@ -31,5 +31,6 @@ def get_init_user_cache_from_session():
 
 def set_user_cache(estimate):
     uid = estimate.uid
-    logging.info("Setting cache for %s  for tenant:%s ", str(uid), str(estimate.tenant_url))
-    cache.set(uid, estimate)
+    cache_updated = cache.set(uid, estimate)
+    if cache_updated:
+        logging.info("Setting cache for %s with tenant:%s ", str(uid), str(estimate.tenant_url))

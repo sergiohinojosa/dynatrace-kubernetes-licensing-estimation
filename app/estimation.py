@@ -284,10 +284,30 @@ def estimate_costs(e):
         e.queryresult.append(qr)
         set_user_cache(e)
 
-        
+    # Costs calculation
     e.k8_costs= e.t_pod_h * e.price_pod_hour
     e.app_costs= e.t_gib_h * e.price_gib_hour
-    
+    # Avg Consumption pod-hour
+    daily_pod_h = round(e.t_pod_h / ( e.iterations * e.days_per_iteration))
+    year_pod_h = round(daily_pod_h * 365)
+    # Avg Consumption Gib-hour
+    daily_gib_h = round(e.t_gib_h / ( e.iterations * e.days_per_iteration))
+    year_gib_h = round(daily_gib_h * 365)
+
+    e.console = e.console + "--------------------------------------------------<br>"
+    e.console = e.console + "Estimation based on the costs retrieved from the iterations from {} to {}<br>".format(e.from_timeframe, date_to)
+    e.console = e.console + "<br>"
+    e.console = e.console + "Kubernetes Monitoring consumption = {} pod-hours<br>".format(f"{e.t_pod_h:,}")
+    e.console = e.console + "Avg daily consumption of {} pod-hours<br>".format(f"{daily_pod_h:,}")
+    e.console = e.console + "Yearly estimation of {} pod-hours<br>".format(f"{year_pod_h:,}")
+    e.console = e.console + "<br>"
+    e.console = e.console + "Application Observability consumption = {} Gib-hours<br>".format(f"{e.t_gib_h:,}")
+    e.console = e.console + "Avg daily consumption of {} Gib-hours<br>".format(f"{daily_gib_h:,}")
+    e.console = e.console + "Yearly estimation of {} Gib-hours<br>".format(f"{year_gib_h:,}")
+
+    #e.console = e.console + "Monitoring estimated costs are {} pod-hours * {} USD = ${} USD<br>".format(f"{e.t_pod_h:,}", str(e.price_pod_hour), f"{e.k8_costs:,}")
+    #e.console = e.console + "Application Observability estimated costs are {} Gib-hours * {} USD = ${} USD<br>".format(f"{e.t_gib_h:,}", str(e.price_gib_hour), f"{e.app_costs:,}")
+        
     logging.info("Kubernetes Monitoring consumption from %s to %s = %s pod-hours", e.from_timeframe, date_to, f"{e.t_pod_h:,}")
     logging.info("Kubernetes Monitoring estimated costs are %s pod-hours * %s USD = $%s USD", f"{e.t_pod_h:,}", str(e.price_pod_hour), f"{e.k8_costs:,}")
     logging.info("")
