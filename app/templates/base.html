@@ -83,6 +83,13 @@
       font-family: "Lucida Console", "Courier New", monospace;
       font-size:small;
     }
+
+    .rum {
+      text-align: right;
+      font-size:small;
+      color:lightgray;
+
+    }
   </style>
 
 </head>
@@ -118,8 +125,13 @@
 
   <br>
   <br>
+
   <footer class="container" style="text-align: center;">© 2024 Dynatrace - Solution Engineering</footer>
 
+  <footer class="rum">
+    <div class="tenant_url"> {{ estimate.tenant_url}} </div>
+    <div class="uid"> {{ estimate.uid}} </div>
+  </footer>
 </body>
 
 </html>
