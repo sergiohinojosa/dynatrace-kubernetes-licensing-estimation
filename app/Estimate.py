@@ -130,7 +130,7 @@ class Estimate:
 
     def is_estimation_running(self):
         return self.estimation_running
-    
+     
     def set_estimation_running(self, estimation_running):
         self.estimation_running = estimation_running
 
