@@ -4,7 +4,7 @@
 
 {% block body %}
 <div>
-    <h3>K8stimator - Kubernetes DPS Costs Estimator </h3>
+    <h3 style="text-align: center;">K8stimator - Kubernetes DPS Costs Estimator </h3>
 </div>
 
 {% if estimate.errors > '' %}
@@ -22,14 +22,14 @@ please be patient
 
 {% else %}
 
-{% if INSIDE_VPN %}
-TODO verify request and modify form. Read ENV variable. maybe use html hidden?
-{% endif %}
-
 <form class="pure-form" action="/" method="POST">
     <div class="estimate-form">
         <div class="control-group">
+            {% if inside_vpn == "True" %}
             <div>
+            {% else %}
+            <div style="display:none;">
+            {% endif %}
                 <label>
                     <input type="radio" name="saasRadio" value="SaaS" checked="True">
                     SaaS

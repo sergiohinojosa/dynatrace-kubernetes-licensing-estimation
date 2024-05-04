@@ -8,6 +8,7 @@ from .cache import *
 def index():
     error = None
     estimate = get_init_user_cache_from_session()
+    inside_vpn = os.environ.get('INSIDE_VPN', False)
     
     if request.method == 'POST':
     # POST Handling
@@ -18,9 +19,9 @@ def index():
             start_estimation(estimate)
     else:
     # GET Handling
-        return render_template('index.html', error=error, estimate=estimate)
+        return render_template('index.html', error=error, estimate=estimate, inside_vpn=inside_vpn)
     
-    return render_template('index.html', error=error, estimate=estimate)
+    return render_template('index.html', error=error, estimate=estimate, inside_vpn=inside_vpn)
 
 @app.route('/doc')
 def about():

@@ -25,7 +25,7 @@
   pods for verifying the accuracy of the resolution since the recommended resolution is 1 hour and not 15 minutes (as
   stated in the documentation). This because of increasing performance (reducing the payload by 400%) and avoiding
   metrics limitations withouth impacting the accuracy of the estimation. Normally a resolution of 1h in big environments
-  is not bigger that 1%. Meaning only 1% of the pods existed during 1 hour or less.
+  is not bigger that 1%. Meaning only 1% of the short-living pods existed one time (had one data point) during the specified resolution, with this approach is possible to increase the resolution knowing how big the impact is in the accuracy. However, is good to know that the impact is just a higher impact on the costs by calculating more data-points (Gib-hours) of the pod than they should which at the end will not result in unpredicted costs to the customer. Still the goal is to be as accurate as possible, but if there is an inaccuracy, this should be at least in higher costs and not the other way around.  
   <br><br>
   At the end of all the iterations, a sum will be done calculating the total ammount of Pod-hours and Gib-hours. Also a
   daily average will be calculated and a yearly estimation will be done. This assuming of course the dynamics of the
