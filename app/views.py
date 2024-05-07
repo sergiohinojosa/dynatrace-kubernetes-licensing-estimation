@@ -51,10 +51,14 @@ def start_estimation(estimate):
     estimate.t_gib_h = 0
     estimate.t_instances = 0
     estimate.t_shortliving_instances = 0
-
-    estimate.tenant_url = request.form['tenant_url']
-    estimate.api_token = request.form['api_token'] 
     
+    radio = request.form['saasRadio']
+    if 'Managed' in radio:
+         estimate.tenant_url = request.form['managed_url']
+    else:
+         estimate.tenant_url = request.form['saas_url']
+
+    estimate.api_token = request.form['api_token'] 
     estimate.ssoCSRFCookie = request.form['ssoCSRFCookie'] 
     estimate.jsessionId = request.form['jsessionId'] 
     estimate.resolution = request.form['resolution'] 

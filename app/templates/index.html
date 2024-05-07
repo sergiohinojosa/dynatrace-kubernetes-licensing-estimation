@@ -40,14 +40,14 @@ please be patient
                 </label>
             </div>
             <div class="SaaS selectt">
-                <label for="tenant_url">Tenant URL</label>
-                <input type="text" name="tenant_url" placeholder="https://tenantid.live.dynatrace.com" size="100%"
+                <label for="saas_url">Tenant URL</label>
+                <input type="text" name="saas_url" placeholder="https://tenantid.live.dynatrace.com" size="100%"
                     value="{{ estimate.tenant_url }}">
                 <br>
             </div>
             <div class="Managed selectt" style="display: none;">
-                <label for="tenant_url">Managed MC Url</label>
-                <input type="text" name="tenant_url"
+                <label for="managed_url">Managed MC Url</label>
+                <input type="text" name="managed_url"
                     placeholder="https://{cluster-id}-{nodeNr}.managed.internal.dynatrace.com:8021/e/{managed-tenant-id}"
                     size="100%" value="{{ estimate.tenant_url }}">
                 <br>

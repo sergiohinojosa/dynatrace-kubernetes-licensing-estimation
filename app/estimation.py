@@ -94,9 +94,9 @@ def validate_query(e, query, action, defaultvalue=''):
             logging.debug("No warnings in the response")
         except json.decoder.JSONDecodeError as err:
             if conf.MANAGED_DNS in e.get_tenant_url():
-                logging.error("Please make sure that you have set the proper Mission Control Cookies 'ssoCSRFCookie' 'JSESSIONID'")
-                logging.error("and you have established a connection to the Cluster via MC.")
-                raise err
+                msg = "Please make sure that you have set the proper Mission Control Cookies 'ssoCSRFCookie' 'JSESSIONID' and you have established a connection to the Cluster via MC"
+                logging.error(msg)
+                raise Exception(msg)
             else:
                 # raise uknown e, handled by wrapper
                 raise err
