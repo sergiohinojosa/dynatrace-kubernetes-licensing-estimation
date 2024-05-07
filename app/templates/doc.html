@@ -3,7 +3,7 @@
 {% block body %}
 <h3 style="text-align: center;">K8stimator - Documentation</h3>
 <div class="jumbotron">
-  <h4>How does the K8stimator work?</h4>
+  <h4>📈 How does the K8stimator work?</h4>
   The K8stimator only needs an API Token with access to "Read metrics (GET Requests to Metrics API v2)" and the tenant
   URL. The program will fetch all PGIs that lived in the specified time that ran in Kubernetes or OpenShift environments
   and mimic the DPS Algorithm stated in our documentation for <a target="_blank"
@@ -31,7 +31,7 @@
   daily average will be calculated and a yearly estimation will be done. This assuming of course the dynamics of the
   enviroment stay linear through the whole year.
   <br><br>
-  <h4>⚠️I saw a warning in the iterations! what do I do? ⚠️</h4>
+  <h4>⚠️I saw a warning in the iterations! what do I do? </h4>
   A warning means that the data is capped due the amount of data fetched. This will lead to unaccurate results. This can
   be due the lenght of the iteration and/or the resolution. Also the older the data is, higher the aggregation on the
   metrics are and the server has more trouble to fetch data with a higher resolution. <br>
@@ -40,7 +40,7 @@
   or two months.
   Be carefull that the "from_timeframe" + "the iterations" x "days per iteration" does not surpasses today.
   <br><br>
-  <h4>❌ I get an error 503! Service Unavailable within the warning of the query, what do I do? ❌</h4>
+  <h4>❌ I get an error 503! Service Unavailable within the warning of the query, what do I do? </h4>
   If you get an error like the following: <br>
   <i style="font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif">:warning: There was an error: Query [builtin:tech.generic.mem.workingSetSize] status : code:503 reason:Service Unavailable Content:b'{"error": {"code": 503,"message": "We've run into technical difficulties. Don't worry though - your data is secure and we've logged this issue. Please try again in 5 minutes."}}'</i>
   <br><br> Most likely the Cluster has a lot of Kubernetes entities and the query is bringing the cluster to its knees. There is a workaround though. Take the last 7 or 14 days and make an estimate like the following: 
@@ -55,7 +55,7 @@
   </b>
   With the above query, you query the server in a resolution that is acceptable and accurate, you get the last 14 days and with this the program will estimate the average consumption and the yearly consumption. If you need assistance, please don't hesitate in contacting Sergio.
   <br><br>
-  <h4>Why do we need an Iterative approach?</h4>
+  <h4>🔄 Why do we need an Iterative approach?</h4>
   In order to be able to calculate and fetch data from big Kubernetes or OpenShift environments with tausends, hundreds
   of tausends or even millions of pods, we need to split the timeframe with an iterational approach. Specially because
   in order to be sure that the fetched PGIs were actually PODs where the OneAgent existed, we need to merge the PGIs to
@@ -63,15 +63,14 @@
   assertion, the queried entities will easily explode into the millions, hence an iteration approach that is
   customizable is the most appropiate that can be adapted to the size and dynamic of any environment.
   <br><br>
-  <h4>Does it work with Managed Clusters?</h4>
+  <h4>🔓 Does it work with Managed Clusters?</h4>
   Yes, this program is running at the moment in a replica set in a GKE Cluster with no connection to our corporate VPN. Mission Control connection details are hidden. When running inside VPN, a Solution Enginner can establish a connection to the Managed Cluster, enter the connection details (which are hidden if not inside VPN) and the make the same query. An alternate way is to run the container as a standalone docker container within our corporate VPN. For more guidance contact Sergio.
   <br><br>
-  <h4>I opened a new tab and the Estimator is still running, is this a bug? 🐛</h4>
-  <br><br>
+  <h4>🐛 I opened a new tab and the Estimator is still running, is this a bug? </h4>
   No, this is made by design for various reasons. Querying the Dynatrace Clusters with this type of data can take multiple seconds and even minutes per query. If the user is not patient, which we are not by default, we tend to send a new request. This behaviour will overload the application making it fail also for all other users and queries. The program is distributed in various pods on the backend. The NGINX Proxy uses sticky sessions to link the user session to the pod running the query and calculating the costs. This way the user can see the progress of the query and we avoid overloading of requests. The application is multithreaded and can manage multiple requests at the same time. In case you need to run another query at the same time, please just open another browser or a browser with incognito window. 
   
-
-  <h4>More information about Kubernetes Observability and Application Observability consumption</h4>
+  <br><br>
+  <h4>ℹ️ More information about Kubernetes Observability and Application Observability consumption</h4>
   <ul>
     <li><h5><a target="_blank"
       href="https://docs.dynatrace.com/docs/shortlink/dps-containers#billing-granularity-for-pod-hour-consumption">
@@ -84,10 +83,9 @@
   Explain Resolution and datapoints. 15 Min is the resolution used in the algorithm for the DPS calculation, but for optimization we use 1hour since is accurate enough for the dynamics of Kuernetes environments. Meaninng the short-living instances live normally over 1 hour. Accepted resolutions are 15m, 1h, 6h and 1d
 -->
 <br>
-<h4>Whats the techstack of the K8stimator?</h4>
+<h4>💻 What's the techstack of the K8stimator?</h4>
 The K8stimator was born within a simple Python script that turned into a somewhat full fledged Python app including Flask Web technology and Caching for asynchronous management of data. If you want to contribute, that's great! any help is welcome.
 <br>
 Take a look at the source code, here is the github repository: <a target="_blank" href="https://github.com/sergiohinojosa/dynatrace-kubernetes-licensing-estimation">https://github.com/sergiohinojosa/dynatrace-kubernetes-licensing-estimation</a>
-
 </div>
 {% endblock %}
