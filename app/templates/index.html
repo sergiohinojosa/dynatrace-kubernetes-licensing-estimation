@@ -87,15 +87,17 @@ please be patient
 {% if estimate.t_pod_h > 0 %} 
 <div class="console">
     
-    Estimating costs for Tenant: {{ estimate.tenant_url}} <br>
-    --------------------------------------- <br>
+    Estimating costs for Tenant: {{ estimate.tenant_url}} from {{ estimate.from_timeframe }} <br>
+    Doing {{ estimate.iterations }} iterations with {{ estimate.days_per_iteration }} days per iteration.<br>
+    -------------------------------------------------- <br>
+    {{ estimate.console | safe }}
+    <br>
+    -------------------------------------------------- <br>
+    Summary:<br>
     Total Pod Hours: {{ estimate.t_pod_h}} <br>
     Total Gib Hours: {{ estimate.t_gib_h}} <br>
-    Total shortliving instances: {{ estimate.t_shortliving_instances}} <br>
-    Total instances: {{ estimate.t_instances}}<br>
-    ---------------------------------------
-    {{ estimate.console | safe }}
-    
+    Total shortliving instances (App Observability): {{ estimate.t_shortliving_instances }} <br>
+    Total instances (App Observability): {{ estimate.t_instances }}<br>
 </div>
 {% endif %}
 

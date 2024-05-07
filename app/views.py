@@ -45,7 +45,13 @@ def start_estimation(estimate):
     # Reset Error & Console
     estimate.errors = ""
     estimate.console = ""
-    
+
+    # Reset previous values (if any)
+    estimate.t_pod_h = 0
+    estimate.t_gib_h = 0
+    estimate.t_instances = 0
+    estimate.t_shortliving_instances = 0
+
     estimate.tenant_url = request.form['tenant_url']
     estimate.api_token = request.form['api_token'] 
     
