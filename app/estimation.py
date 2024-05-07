@@ -129,9 +129,13 @@ def estimate_podhours(e, podQuery):
 
     # Work with the payload
     # TODO Finish the calculation by NS for doing a report
-    total_pod_hours = int(podQuery.get_json_payload()['result'][0]['data'][0]['values'][0])
-    podQuery.set_total_pod_hours(total_pod_hours)
+    try:
+        total_pod_hours = int(podQuery.get_json_payload()['result'][0]['data'][0]['values'][0])
+    except IndexError as err:
+        podQuery.warnings.append("No pods in the queried timeframe")
+        total_pod_hours = 0
 
+    podQuery.set_total_pod_hours(total_pod_hours)
     return
 
 

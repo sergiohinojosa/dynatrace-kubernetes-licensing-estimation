@@ -84,7 +84,7 @@ please be patient
 
 
 <br>
-{% if estimate.t_pod_h > 0 %} 
+{% if estimate.console or estimate.estimation_running %} 
 <div class="console">
     
     Estimating costs for Tenant: {{ estimate.tenant_url}} from {{ estimate.from_timeframe }} <br>
