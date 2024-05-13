@@ -4,10 +4,12 @@
 #
 
 # ----------------------
-# Variables declaration and helper 
-# functions
+# Variables declaration and helper functions
 
+# Add or remove namespaces to exclude from the Gib-hour calculation
+# The script will assume that the namespaces are instrumentable
 NAMESPACES_TO_EXCLUDE="system|dynatrace|cert-manager|istio"
+
 namespaces_msg="
  The following namespaces will be exluded from the Gib/h calculation.
  Modify the 'NAMESPACES_TO_EXCLUDE' variable so the estimation suits your 
@@ -16,13 +18,6 @@ namespaces_msg="
  
  NAMESPACES_TO_EXCLUDE=$NAMESPACES_TO_EXCLUDE
  "
-
-# --- Variables --
-
-# List prices $0.002 per POD-hour in USD
-price_pod_hour=0.002
-# List price  $0.01 per GiB-hour AppOnly in USD
-price_gib_hour=0.01
 
 declare -r min_memory=256
 declare -a rounded_memories
@@ -67,7 +62,7 @@ getClusterInfo() {
 calculatePodHours() {
 
     # Calculation of the POD Hours for the Year
-    printInfoSection "POD Hours Calculation"
+    printInfoSection "Pod-hours Estimation"
 
     total_pods=$(kubectl get pods --all-namespaces --no-headers | wc -l)
     # Command 1: This will help to estimate the average # of pods running per day
@@ -75,11 +70,13 @@ calculatePodHours() {
 
     printInfo "Assuming these $total_pods pods run for 24 hours"
     printInfo "The daily pod-hour consumption is $((total_pods * 24)) pod-hours"
+    printInfo "The monthly pod-hour consumption is $((total_pods * 24 * 30)) pod-hours"
+    printInfo "The yearly pod-hour consumption is $((total_pods * 24 * 365)) pod-hours"
     
 }
 
 calculateMemoryRoundUp() {
-    printInfoSection "POD Memory Calculation"
+    printInfoSection "GIb-hour Estimation"
     i=0
 
     echo "$namespaces_msg"
@@ -128,7 +125,7 @@ calculateMemoryRoundUp() {
 
 calculateMemoryDailyUsage(){
      
-    printInfoSection "POD Memory usage Estimation"
+    printInfoSection "Gib-hour estimation"
     
     for k in "${!rounded_memories[@]}"
     do
@@ -152,33 +149,26 @@ calculateMemoryDailyUsage(){
 
 calculateEstimation(){
 
-     printInfoSection "POD-Hour and GiB-Hour Monthly and Yearly costs estimation"
+     printInfoSection "POD-Hour and GiB-Hour Monthly and Yearly estimation"
 
      echo ""
-     echo "---- POD-hour estimation ---- "
-     echo "The price for POD-hour is $ $price_pod_hour USD"
-     pod_hours_month=$((total_pods * 24 * 30))
-     # Using AWK for floating number calculation 
-     pod_hours_month_est=$(echo $pod_hours_month $price_pod_hour | awk '{print $1 * $2}' )
-     echo "The price for $pod_hours_month monthly pod-hours is: $ $pod_hours_month_est USD"
+     echo "---- Pod-hour estimation ---- "
+     echo "The Pod-hour estimation for the month is $((total_pods * 24 * 30)) Pod-hours"
+     echo "The Pod-hour estimation for the year is $((total_pods * 24 * 365)) Pod-hours"
      echo ""
      
      
      echo ""
      echo "---- GiB-hour estimation ---- "
-     echo "The price for GiB-hour is $ $price_gib_hour USD"
+     
      gib_hour_month=$(( (total_memory_rounded * 30 ) / 1024 ))
      gib_hour_year=$(( (total_memory_rounded * 365 ) / 1024 ))
     
-     # Using AWK for floating number calculation 
-     gib_hour_month_est=$(echo $gib_hour_month $price_gib_hour | awk '{print $1 * $2}' )
-     gib_hour_year_est=$(echo $gib_hour_year $price_gib_hour | awk '{print $1 * $2}' )
-     echo "The price for $gib_hour_month monthly GiB-hours is: $ $gib_hour_month_est USD"
-     echo "The price for $gib_hour_year yearly GiB-hours is: $ $gib_hour_year_est USD"
+     echo "The Gib-hour estimation for the month is $gib_hour_month Gib-hours"
+     echo "The Gib-hour estimation for the year is $gib_hour_year Gib-hours"
      echo ""
 
 }
-
 
 
 
