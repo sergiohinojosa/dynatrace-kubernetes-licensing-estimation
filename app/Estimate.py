@@ -162,6 +162,9 @@ class Estimate:
         if not any(value in self.tenant_url for value in ('.live.dynatrace.com' or '.sprint.dynatracelabs.com' or 'managed.internal.dynatrace.com')):
             raise SyntaxWarning("Tenant URL does not contain a valid (sub)domain for querying the API. See the documentation.")
 
+        if self.tenant_url.endswith('/'):
+            self.tenant_url = self.tenant_url.strip('/')
+
         if not any(value in self.resolution for value in('15m', '1h' , '6h',  '1d')):
             raise SyntaxWarning("Valid resolution tipes are 15m, 1h, 6h, 1d")
         

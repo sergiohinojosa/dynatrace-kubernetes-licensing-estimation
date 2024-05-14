@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Estimate with Kubectl{% endblock %}
+{% block body %}
+
+<h3 style="text-align: center;">K8stimator - Estimate.sh </h3> 
+
+<div class="jumbotron">
+  <h4>💻 Estimate with Kubectl</h4>
+  Is Dynatrace not installed on the Kubernetes Cluster? No problem, even though we recommend to have Dynatrace installed into the kubernetes cluster for an accurate estimation,
+    it is still possible to make an estimation based on a snapshot. The shell script mimics the DPS calculation and with assumptions it makes a Pod-hour and Gib-hour estimation. 
+    <br>
+    At the top of the shell script there is a variable named 'NAMESPACES_TO_EXCLUDE'. You can add namespaces that should be excluded from the Gib-hour calculation. The script assumes 
+    that all PODs within a Namespace are instrumentable. Bear in mind that this might not always be the case.  
+   <br>
+   <br>
+Try it out <a href="https://github.com/sergiohinojosa/dynatrace-kubernetes-licensing-estimation/blob/main/shell/estimate.sh">estimate.sh</a>
+</div>
+{% endblock %}

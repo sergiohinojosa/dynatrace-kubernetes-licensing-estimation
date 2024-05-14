@@ -33,6 +33,11 @@ def contact():
     estimate = get_init_user_cache_from_session()
     return render_template("help.html",  estimate=estimate)
 
+@app.route('/kubectl')
+def kubectl():
+    estimate = get_init_user_cache_from_session()
+    return render_template("kubectl.html",  estimate=estimate)
+
 @app.route('/show_cache')
 def show_cache():
 
