@@ -76,8 +76,23 @@ class Estimate:
         # API V2 Endpoint for metric selection
         self.q_metric_selector_endpoint="/api/v2/metrics/query?metricSelector="
 
+        self.q_condition_k8s_host="""or(
+        in("dt.entity.host",entitySelector("type(HOST),softwareTechnologies(KUBERNETES)")),
+        in("dt.entity.host",entitySelector("type(HOST),paasVendorType(KUBERNETES)")),
+        in("dt.entity.host",entitySelector("type(HOST),paasVendorType(OPENSHIFT)")
+        ))))
+        """
+        
         # Query to fetch the avg size of K8s PGIs and the ammount of datapoints with a 
-        # 15m resolution 
+        # 15m resolution  
+        ## TODO Refactor the k8s condition
+        self.q_k8s_filter = """:filter(and(
+        or(
+        in("dt.entity.host",entitySelector("type(HOST),softwareTechnologies(KUBERNETES)")),
+        in("dt.entity.host",entitySelector("type(HOST),paasVendorType(KUBERNETES)")),
+        in("dt.entity.host",entitySelector("type(HOST),paasVendorType(OPENSHIFT)")
+        ))))"""
+
         self.query_body="""
         builtin:tech.generic.mem.workingSetSize:parents:filter(
         and(
@@ -86,8 +101,9 @@ class Estimate:
         or(
         in("dt.entity.host",entitySelector("type(HOST),softwareTechnologies(KUBERNETES)")),
         in("dt.entity.host",entitySelector("type(HOST),paasVendorType(KUBERNETES)")),
-        in("dt.entity.host",entitySelector("type(HOST),paasVendorType(OPENSHIFT)")))
-        )):splitBy("dt.entity.process_group_instance"):count:fold(sum):sort(value(sum,ascending)),
+        in("dt.entity.host",entitySelector("type(HOST),paasVendorType(OPENSHIFT)")
+        ))))
+        :splitBy("dt.entity.process_group_instance"):count:fold(sum):sort(value(sum,ascending)),
         builtin:tech.generic.mem.workingSetSize:parents:filter(
         and(
         in("dt.entity.process_group_instance",entitySelector("type(PROCESS_GROUP_INSTANCE),
@@ -95,11 +111,20 @@ class Estimate:
         or(
         in("dt.entity.host",entitySelector("type(HOST),softwareTechnologies(KUBERNETES)")),
         in("dt.entity.host",entitySelector("type(HOST),paasVendorType(KUBERNETES)")),
-        in("dt.entity.host",entitySelector("type(HOST),paasVendorType(OPENSHIFT)")))
-        )):splitBy("dt.entity.process_group_instance"):avg:fold(avg):sort(value(avg,ascending))
+        in("dt.entity.host",entitySelector("type(HOST),paasVendorType(OPENSHIFT)")))))
+        :splitBy("dt.entity.process_group_instance"):avg:fold(avg):sort(value(avg,ascending))
         """
+
         self.q_to_unit=":toUnit(Byte," + self.unit + ")"
-        self.q_resolution="&resolution="+ self.resolution
+
+        self.q_fullstack_k8s = """builtin:billing.full_stack_monitoring.usage_per_host:filter(and(or(
+        in("dt.entity.host",entitySelector("type(HOST),softwareTechnologies(KUBERNETES)")),
+        in("dt.entity.host",entitySelector("type(HOST),paasVendorType(KUBERNETES)")),
+        in("dt.entity.host",entitySelector("type(HOST),paasVendorType(OPENSHIFT)")
+        )))):splitBy():splitBy():sum:fold(value)"""
+
+        self.q_fullstack = """builtin:billing.full_stack_monitoring.usage_per_host:splitBy():sum:fold(value)"""
+        
         self.q_resolution_1h="&resolution=1h"
         self.q_from="&from=" 
         self.q_from_t = self.q_from + self.from_timeframe
@@ -107,15 +132,30 @@ class Estimate:
         self.q_to_t= self.q_to + self.to_timeframe
         self.q_podhour_metric = "builtin:kubernetes.pods:splitBy():sum:fold(value)"
 
-        # Put the parametrized Query together
-        self.query_pods_by_ns_static = self.q_metric_selector_endpoint +  self.q_podhour_metric + self.q_resolution_1h + self.q_from_t + self.q_to_t 
-        self.query_pods_by_ns_dyn = self.q_metric_selector_endpoint +  self.q_podhour_metric + self.q_resolution_1h 
+    
+    def get_query_fullstack_k8s(self):
+        return self.q_metric_selector_endpoint +  self.q_fullstack_k8s + self.q_to_unit
+    
+    def get_query_fullstack(self):
+        return self.q_metric_selector_endpoint +  self.q_fullstack + self.q_to_unit
 
-        # Put the parametrized Query together
-        self.query_memory_static = self.q_metric_selector_endpoint + self.query_body + self.q_to_unit + self.q_resolution + self.q_from_t + self.q_to_t 
-        self.query_memory_dyn = self.q_metric_selector_endpoint + self.query_body + self.q_to_unit + self.q_resolution  
+    # Put the parametrized Query together
+    def get_query_pods_by_ns_static(self):
+        return self.q_metric_selector_endpoint +  self.q_podhour_metric + self.q_resolution_1h + self.q_from_t + self.q_to_t 
 
+    # Put the parametrized Query together
+    def get_query_memory_static(self):
+        return self.q_metric_selector_endpoint + self.query_body + self.q_to_unit +  self.get_q_resolution() + self.q_from_t + self.q_to_t 
 
+    def get_query_pods_by_ns_dyn(self):
+        return self.q_metric_selector_endpoint +  self.q_podhour_metric + self.q_resolution_1h 
+    
+    def get_query_memory_dyn(self):
+        return self.q_metric_selector_endpoint + self.query_body + self.q_to_unit + self.get_q_resolution()
+    
+    def get_q_resolution(self):
+        return "&resolution=" + self.resolution
+    
     def get_tenant_url(self):
         return self.tenant_url
     

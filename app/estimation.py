@@ -191,12 +191,12 @@ def estimate_costs(e):
             q_from_dyn = e.q_from + str(int(date_from_start.timestamp() * 1000))
             q_to_dyn = e.q_to + str(int(date_from_end.timestamp() * 1000))
             
-            pod_query = Query(e.query_pods_by_ns_dyn + q_from_dyn + q_to_dyn)
+            pod_query = Query(e.get_query_pods_by_ns_dyn() + q_from_dyn + q_to_dyn)
             pod_query.set_date_from(date_from_start)
             pod_query.set_date_to(date_from_end)
             pod_Queries.append(pod_query)
 
-            mem_query = Query(e.query_memory_dyn + q_from_dyn + q_to_dyn)
+            mem_query = Query(e.get_query_memory_dyn() + q_from_dyn + q_to_dyn)
             mem_query.set_date_from(date_from_start)
             mem_query.set_date_to(date_from_end)
             mem_Queries.append(mem_query)
@@ -205,12 +205,12 @@ def estimate_costs(e):
         # To is static - already embebded in the query string
         date_to = datetime.datetime.strptime(e.to_timeframe, conf.FORMAT_DATE)
 
-        pod_query = Query(e.query_pods_by_ns_static)
+        pod_query = Query(e.get_query_pods_by_ns_static())
         pod_query.set_date_from(date_from)
         pod_query.set_date_to(date_to)
         pod_Queries.append(pod_query)
         
-        mem_query = Query(e.query_memory_static)
+        mem_query = Query(e.get_query_memory_static())
         mem_query.set_date_from(date_from)
         mem_query.set_date_to(date_to)
         mem_Queries.append(mem_query)
