@@ -138,6 +138,40 @@ def estimate_podhours(e, podQuery):
     podQuery.set_total_pod_hours(total_pod_hours)
     return
 
+def fetch_actual_consumption(e, fullstackQuery, fullstackK8sQuery, fullstackApponly):
+    """Function to fetch actual DPS FullStack consumption """
+
+    fullstackQuery.set_response(do_get(e, fullstackQuery.get_query()))
+    # Validate response
+    validate_query(e, fullstackQuery, "Query [builtin:billing.full_stack_monitoring.usage_per_host] status")
+
+    fullstackK8sQuery.set_response(do_get(e, fullstackK8sQuery.get_query()))
+    validate_query(e, fullstackK8sQuery, "Query [builtin:billing.full_stack_monitoring.usage_per_host:filter(k8s)] status")
+
+    fullstackApponly.set_response(do_get(e, fullstackApponly.get_query()))
+    validate_query(e, fullstackApponly, "Query [builtin:billing.full_stack_monitoring.usage_per_container] status")
+
+    try:
+        t_gib_h_fullstack = int(fullstackQuery.get_json_payload()['result'][0]['data'][0]['values'][0])
+    except IndexError as err:
+        fullstackQuery.warnings.append("No FullStack consumption in the queried timeframe")
+        t_gib_h_fullstack = 0
+    try:
+        t_gib_h_fullstack_k8s = int(fullstackK8sQuery.get_json_payload()['result'][0]['data'][0]['values'][0])
+    except IndexError as err:
+        fullstackK8sQuery.warnings.append("No FullStack consumption K8s in the queried timeframe")
+        t_gib_h_fullstack_k8s = 0
+    try:
+        t_gib_h_fullstack_apponly = int(fullstackApponly.get_json_payload()['result'][0]['data'][0]['values'][0])
+    except IndexError as err:
+        fullstackApponly.warnings.append("No FullStack consumption AppOnly in the queried timeframe")
+        t_gib_h_fullstack_apponly = 0
+    
+    e.t_gib_h_fullstack = t_gib_h_fullstack
+    e.t_gib_h_fullstack_k8s = t_gib_h_fullstack_k8s
+    e.t_gib_h_fullstack_apponly = t_gib_h_fullstack_apponly
+
+    return
 
 def estimate_costs_wrapper(e):
     """Wrapper function for estimate_costs for effective error handling"""
@@ -215,6 +249,14 @@ def estimate_costs(e):
         mem_query.set_date_to(date_to)
         mem_Queries.append(mem_query)
         logging.debug("From to Query mode activated.")
+    
+    # Calculate again beginning and end for getting actual billing consumption, no iteration, 
+    # getting the sum of the whole timeperiod
+    q_from = e.q_from + str(int(datetime.datetime.strptime(e.from_timeframe, conf.FORMAT_DATE).timestamp() * 1000))
+    q_to = e.q_to + str(int(date_from_end.timestamp() * 1000))
+    fullstack_query = Query(e.get_query_fullstack() + q_from + q_to)
+    fullstack_k8s_query = Query(e.get_query_fullstack_k8s() + q_from + q_to)
+    fullstack_apponly_query = Query(e.get_query_fullstack_apponly() + q_from + q_to)
 
     # Execute the Queries
     actual_i = len(pod_Queries)
@@ -288,6 +330,9 @@ def estimate_costs(e):
         e.queryresult.append(qr)
         set_user_cache(e)
 
+    # Fetch the actual FullStack consumption of the Tenant
+    fetch_actual_consumption(e, fullstack_query, fullstack_k8s_query, fullstack_apponly_query) 
+
     # Costs calculation
     e.k8_costs= e.t_pod_h * e.price_pod_hour
     e.app_costs= e.t_gib_h * e.price_gib_hour
@@ -299,23 +344,24 @@ def estimate_costs(e):
     year_gib_h = round(daily_gib_h * 365)
 
     e.console = e.console + "--------------------------------------------------<br>"
-    e.console = e.console + "Estimation based on the costs retrieved from the iterations from {} to {}<br>".format(e.from_timeframe, date_to)
+    e.console = e.console + "Estimation based on the costs retrieved from the iterations from T: {} - {}<br>".format(e.from_timeframe, date_to)
     e.console = e.console + "<br>"
-    e.console = e.console + "Kubernetes Monitoring consumption = {} pod-hours<br>".format(f"{e.t_pod_h:,}")
-    e.console = e.console + "Avg daily consumption of {} pod-hours<br>".format(f"{daily_pod_h:,}")
+    e.console = e.console + "Kubernetes Monitoring estimation = {} pod-hours<br>".format(f"{e.t_pod_h:,}")
+    e.console = e.console + "Avg daily estimation of {} pod-hours<br>".format(f"{daily_pod_h:,}")
     e.console = e.console + "Yearly estimation of {} pod-hours<br>".format(f"{year_pod_h:,}")
     e.console = e.console + "<br>"
-    e.console = e.console + "Application Observability consumption = {} Gib-hours<br>".format(f"{e.t_gib_h:,}")
-    e.console = e.console + "Avg daily consumption of {} Gib-hours<br>".format(f"{daily_gib_h:,}")
+    e.console = e.console + "Application Observability estimation = {} Gib-hours<br>".format(f"{e.t_gib_h:,}")
+    e.console = e.console + "Avg daily estimation of {} Gib-hours<br>".format(f"{daily_gib_h:,}")
     e.console = e.console + "Yearly estimation of {} Gib-hours<br>".format(f"{year_gib_h:,}")
+    e.console = e.console + "<br>"
+    e.console = e.console + "Fullstack consumption for T: {} Gib-hours.   Estimation ratio {}% <br>".format(f"{e.t_gib_h_fullstack:,}", round( 100 * (e.t_gib_h / e.t_gib_h_fullstack)) )
+    e.console = e.console + "Fullstack for Kubernetes Hosts consumption for T: {} Gib-hours.    FullStack ratio {}%, Estimation ratio {}%<br>".format(f"{e.t_gib_h_fullstack_k8s:,}", round(100 * ( e.t_gib_h_fullstack_k8s / e.t_gib_h_fullstack  )), round(100 * (e.t_gib_h / e.t_gib_h_fullstack_k8s  )))
+    e.console = e.console + "Fullstack for AppOnly consumption for T: {} Gib-hours.   FullStack ratio {}%, Estimation ratio {}%<br>".format(f"{e.t_gib_h_fullstack_apponly:,}", round(100 * (e.t_gib_h_fullstack_apponly / e.t_gib_h_fullstack )), round( 100 * ( e.t_gib_h / e.t_gib_h_fullstack_apponly )))
 
-    #e.console = e.console + "Monitoring estimated costs are {} pod-hours * {} USD = ${} USD<br>".format(f"{e.t_pod_h:,}", str(e.price_pod_hour), f"{e.k8_costs:,}")
-    #e.console = e.console + "Application Observability estimated costs are {} Gib-hours * {} USD = ${} USD<br>".format(f"{e.t_gib_h:,}", str(e.price_gib_hour), f"{e.app_costs:,}")
-        
-    logging.info("Kubernetes Monitoring consumption from %s to %s = %s pod-hours", e.from_timeframe, date_to, f"{e.t_pod_h:,}")
+    logging.info("Kubernetes Monitoring estimation from %s to %s = %s pod-hours", e.from_timeframe, date_to, f"{e.t_pod_h:,}")
     logging.info("Kubernetes Monitoring estimated costs are %s pod-hours * %s USD = $%s USD", f"{e.t_pod_h:,}", str(e.price_pod_hour), f"{e.k8_costs:,}")
     logging.info("")
-    logging.info("Application Observability consumption from %s to %s = %s Gib-hours", e.from_timeframe, date_to, f"{e.t_gib_h:,}")
+    logging.info("Application Observability estimation from %s to %s = %s Gib-hours", e.from_timeframe, date_to, f"{e.t_gib_h:,}")
     logging.info("Application Observability estimated costs are %s Gib-hours * %s USD = $%s USD", f"{e.t_gib_h:,}", str(e.price_gib_hour), f"{e.app_costs:,}")
     
     logging.info("")

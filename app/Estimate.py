@@ -61,6 +61,11 @@ class Estimate:
         self.price_pod_hour = 0.002
         self.price_gib_hour = 0.01
 
+        # FullStack Consumption
+        self.t_gib_h_fullstack = 0
+        self.t_gib_h_fullstack_k8s = 0
+        self.t_gib_h_fullstack_apponly = 0
+
         # Results
         self.t_pod_h = 0
         self.t_gib_h = 0
@@ -123,7 +128,9 @@ class Estimate:
         in("dt.entity.host",entitySelector("type(HOST),paasVendorType(OPENSHIFT)")
         )))):splitBy():splitBy():sum:fold(value)"""
 
-        self.q_fullstack = """builtin:billing.full_stack_monitoring.usage_per_host:splitBy():sum:fold(value)"""
+        self.q_fullstack = "builtin:billing.full_stack_monitoring.usage_per_host:splitBy():sum:fold(value)"
+
+        self.q_fullstack_apponly = "builtin:billing.full_stack_monitoring.usage_per_container:splitBy():sum:fold(value)"
         
         self.q_resolution_1h="&resolution=1h"
         self.q_from="&from=" 
@@ -133,11 +140,14 @@ class Estimate:
         self.q_podhour_metric = "builtin:kubernetes.pods:splitBy():sum:fold(value)"
 
     
+    def get_query_fullstack_apponly(self):
+        return self.q_metric_selector_endpoint +  self.q_fullstack_apponly 
+    
     def get_query_fullstack_k8s(self):
-        return self.q_metric_selector_endpoint +  self.q_fullstack_k8s + self.q_to_unit
+        return self.q_metric_selector_endpoint +  self.q_fullstack_k8s 
     
     def get_query_fullstack(self):
-        return self.q_metric_selector_endpoint +  self.q_fullstack + self.q_to_unit
+        return self.q_metric_selector_endpoint +  self.q_fullstack 
 
     # Put the parametrized Query together
     def get_query_pods_by_ns_static(self):
