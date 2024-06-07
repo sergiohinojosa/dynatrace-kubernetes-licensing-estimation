@@ -97,7 +97,7 @@ please be patient
     Total Pod Hours: {{ "{:,.2f}".format(estimate.t_pod_h) }} <br>
     Total Gib Hours: {{ "{:,.2f}".format(estimate.t_gib_h) }} <br>
     Total shortliving instances (App Observability): {{ "{:,}".format(estimate.t_shortliving_instances) }} <br>
-    Avg instances per iteration (App Observability): {{ "{:,}".format(estimate.t_instances / estimate.iterations ) }}<br>
+    Avg instances per iteration (App Observability): {{ "{:,.2f}".format(estimate.t_instances / estimate.iterations ) }}<br>
 </div>
 {% endif %}
 

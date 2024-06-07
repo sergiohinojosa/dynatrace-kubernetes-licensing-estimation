@@ -354,9 +354,9 @@ def estimate_costs(e):
     e.console = e.console + "Avg daily estimation of {} Gib-hours<br>".format(f"{daily_gib_h:,}")
     e.console = e.console + "Yearly estimation of {} Gib-hours<br>".format(f"{year_gib_h:,}")
     e.console = e.console + "<br>"
-    e.console = e.console + "Fullstack consumption for T: {} Gib-hours.   Estimation ratio {}% <br>".format(f"{e.t_gib_h_fullstack:,}", round( 100 * (e.t_gib_h / e.t_gib_h_fullstack)) )
-    e.console = e.console + "Fullstack for Kubernetes Hosts consumption for T: {} Gib-hours.    FullStack ratio {}%, Estimation ratio {}%<br>".format(f"{e.t_gib_h_fullstack_k8s:,}", round(100 * ( e.t_gib_h_fullstack_k8s / e.t_gib_h_fullstack  )), round(100 * (e.t_gib_h / e.t_gib_h_fullstack_k8s  )))
-    e.console = e.console + "Fullstack for AppOnly consumption for T: {} Gib-hours.   FullStack ratio {}%, Estimation ratio {}%<br>".format(f"{e.t_gib_h_fullstack_apponly:,}", round(100 * (e.t_gib_h_fullstack_apponly / e.t_gib_h_fullstack )), round( 100 * ( e.t_gib_h / e.t_gib_h_fullstack_apponly )))
+    e.console = e.console + "Fullstack consumption for T: {} Gib-hours.   Estimation ratio {}% <br>".format(f"{e.t_gib_h_fullstack:,}", f"{percentage(e.t_gib_h , e.t_gib_h_fullstack):.3f}" )
+    e.console = e.console + "Fullstack for Kubernetes Hosts consumption for T: {} Gib-hours.    FullStack ratio {}%, Estimation ratio {}%<br>".format(f"{e.t_gib_h_fullstack_k8s:,}", f"{percentage(e.t_gib_h_fullstack_k8s , e.t_gib_h_fullstack):.3f}", f"{percentage(e.t_gib_h , e.t_gib_h_fullstack_k8s):.3f}")
+    e.console = e.console + "Fullstack for AppOnly consumption for T: {} Gib-hours.   FullStack ratio {}%, Estimation ratio {}%<br>".format(f"{e.t_gib_h_fullstack_apponly:,}", f"{percentage(e.t_gib_h_fullstack_apponly , e.t_gib_h_fullstack ):.3f}", f"{percentage( e.t_gib_h , e.t_gib_h_fullstack_apponly):.3f}")
 
     logging.info("Kubernetes Monitoring estimation from %s to %s = %s pod-hours", e.from_timeframe, date_to, f"{e.t_pod_h:,}")
     logging.info("Kubernetes Monitoring estimated costs are %s pod-hours * %s USD = $%s USD", f"{e.t_pod_h:,}", str(e.price_pod_hour), f"{e.k8_costs:,}")
@@ -368,6 +368,14 @@ def estimate_costs(e):
     logging.info("Total costs are $%s USD", f"{(e.k8_costs + e.app_costs):,}")
 
     return 
+
+def percentage(part , whole):
+    """ Function to handle division by Zero"""
+    try:
+        return 100 * ( float(part) / float(whole)) 
+    except ZeroDivisionError: 
+        return 0
+    
 
 def estimate_memory(e, memQuery):
     """ Function to estimate the Gib-hour consumption"""
