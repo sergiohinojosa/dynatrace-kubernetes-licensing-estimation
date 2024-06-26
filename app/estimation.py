@@ -91,7 +91,7 @@ def validate_query(e, query, action, defaultvalue=''):
             query.warnings.append(warnings)
             logging.warning("%s:warnings in the response:%s", action, warnings)
         except KeyError:
-            logging.debug("No warnings in the response")
+            logging.debug("No warnings in the response") # TODO if data is empty, add warning and zero to value?
         except json.decoder.JSONDecodeError as err:
             if conf.MANAGED_DNS in e.get_tenant_url():
                 msg = "Please make sure that you have set the proper Mission Control Cookies 'ssoCSRFCookie' 'JSESSIONID' and you have established a connection to the Cluster via MC"
@@ -275,7 +275,7 @@ def estimate_costs(e):
     
         instances = len(mem_query.get_pgis())
         shortliving_instances = len(mem_query.get_shortliving_pgis())
-        percentage_shortliving = 100 * float(shortliving_instances)/float(instances)
+        percentage_shortliving = 100 * divide(shortliving_instances,instances) 
 
         date_from = pod_query.get_date_from().strftime(conf.FORMAT_DATE)
         date_to = pod_query.get_date_to().strftime(conf.FORMAT_DATE)
@@ -370,12 +370,16 @@ def estimate_costs(e):
     return 
 
 def percentage(part , whole):
-    """ Function to handle division by Zero"""
+    """ Function to return a percentage, handles also div by zero"""
     try:
-        return 100 * ( float(part) / float(whole)) 
+        return 100 * ( divide(part, whole)) 
     except ZeroDivisionError: 
         return 0
     
+def divide(part , whole):
+    """ function to handle division by Zero, returns Zero if whole is 0"""
+    return float(part) / float(whole) if whole else 0
+
 
 def estimate_memory(e, memQuery):
     """ Function to estimate the Gib-hour consumption"""
@@ -412,6 +416,9 @@ def estimate_memory(e, memQuery):
         total_memory = total_memory + pgi.get_memory_total()
 
     memQuery.set_total_memory(total_memory)
+
+    if not pgis:
+         memQuery.warnings.append("No pods have been instrumented in the specified timeframe.")
 
     return
 

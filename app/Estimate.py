@@ -50,8 +50,8 @@ class Estimate:
 
         # Runtime
         self.iterative_query = True
-        self.from_timeframe = "2024-03-01"
-        self.to_timeframe = "2024-03-31"
+        self.from_timeframe = "2024-05-01"
+        self.to_timeframe = "2024-05-31"
         self.iterations = 4
         self.days_per_iteration = 7
 
