@@ -56,7 +56,13 @@ def start_estimation(estimate):
     estimate.t_gib_h = 0
     estimate.t_instances = 0
     estimate.t_shortliving_instances = 0
-    
+
+    # Reset Chart
+    estimate.chart_labels = []
+    estimate.chart_values_pod = []
+    estimate.chart_values_gib = []
+
+
     radio = request.form['saasRadio']
     if 'Managed' in radio:
          estimate.tenant_url = request.form['managed_url']

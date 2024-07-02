@@ -327,6 +327,11 @@ def estimate_costs(e):
         qr.pod_h = pod_h
         qr.gib_h = gib_h
 
+        # Add values to Chart
+        e.chart_labels.append(qr.date_to)
+        e.chart_values_pod.append(qr.pod_h)
+        e.chart_values_gib.append(qr.gib_h)
+
         e.queryresult.append(qr)
         set_user_cache(e)
 

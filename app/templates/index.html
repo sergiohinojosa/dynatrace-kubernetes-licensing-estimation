@@ -84,31 +84,32 @@ please be patient
 </form>
 {% endif %}
 
+<br>
+{% if estimate.console or estimate.estimation_running %}
+
 <div>
     <canvas id="estimationChart"></canvas>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 <script>
     const ctx = document.getElementById('estimationChart');
-    
+
     new Chart(ctx, {
         type: 'line',
         data: {
-            labels: {{ estimate.labels | safe }},
+            labels: {{ estimate.chart_labels | safe }},
         datasets: [
         {
             label: 'Pod-hours',
-            data: {{ estimate.values_pod | safe }},
+            data: {{ estimate.chart_values_pod | safe }},
         borderWidth: 1,
-        yAxisID: 'y'
+        yAxisID: 'pod'
         },
         {
             label: 'Gib-hours',
-            data: {{ estimate.values_gib | safe }},
+            data: {{ estimate.chart_values_gib | safe }},
         borderWidth: 1,
-        yAxisID: 'y1',
+        yAxisID: 'gib',
         }
     ]
       },
@@ -119,24 +120,36 @@ please be patient
           intersect: false,
         },
         scales: {
-            y: {
+            pod: {
                 beginAtZero: true,
-                position: 'left'
+                position: 'left',
+                title: {
+                display: true,
+                 text: 'Pod-hour'
+                 }
             },
-            y1:{
+            gib:{
                 position: 'right',
+                title: {
+                display: true,
+                 text: 'Gib-hour'
+                 },
             grid: {
              drawOnChartArea: false, // only want the grid lines for one axis to show up
             },
             }
-        }
+        },
+        plugins: {
+            title: {
+            display: true,
+            text: 'Kubernetes DPS consumption estimation',
+      }
+    }
 
     }
     });
 </script>
-
 <br>
-{% if estimate.console or estimate.estimation_running %}
 <div class="console">
 
     Estimating costs for Tenant: {{ estimate.tenant_url}} from {{ estimate.from_timeframe }} <br>
