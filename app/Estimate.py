@@ -77,6 +77,10 @@ class Estimate:
         self.errors = ""
         self.console = ""
 
+        # Charting 
+        self.labels = [1,2,3,4,5]
+        self.values = [1,2,3,4,5]
+
         # Dynamic Query
         # API V2 Endpoint for metric selection
         self.q_metric_selector_endpoint="/api/v2/metrics/query?metricSelector="

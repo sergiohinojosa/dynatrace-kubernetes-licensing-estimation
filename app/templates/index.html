@@ -3,9 +3,11 @@
 {% block title %} K8stimator - Kubernetes DPS Costs Estimator {% endblock %}
 
 {% block body %}
+
 <div>
     <h3 style="text-align: center;">K8stimator - Kubernetes DPS Costs Estimator </h3>
 </div>
+
 
 {% if estimate.errors > '' %}
 
@@ -82,6 +84,34 @@ please be patient
 </form>
 {% endif %}
 
+<div>
+    <canvas id="estimationChart"></canvas>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <script>
+    const ctx = document.getElementById('estimationChart');
+  
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: {{ estimate.labels| safe }},
+        datasets: [{
+          label: 'Pod-hours',
+          data: {{ estimate.values| safe }},
+          borderWidth: 1
+        }]
+      },
+      options: {
+        scales: {
+          y: {
+            beginAtZero: true
+          }
+        }
+      }
+    });
+  </script>
 
 <br>
 {% if estimate.console or estimate.estimation_running %} 
