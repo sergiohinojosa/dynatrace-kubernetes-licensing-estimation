@@ -29,94 +29,116 @@ please be patient
         <div class="control-group">
             {% if inside_vpn == "True" %}
             <div>
-            {% else %}
-            <div style="display:none;">
-            {% endif %}
-                <label>
-                    <input type="radio" name="saasRadio" value="SaaS" checked="True">
-                    SaaS
-                </label>
-                <label>
-                    <input type="radio" name="saasRadio" value="Managed">
-                    Managed
-                </label>
-            </div>
-            <div class="SaaS selectt">
-                <label for="saas_url">Tenant URL</label>
-                <input type="text" name="saas_url" placeholder="https://tenantid.live.dynatrace.com" size="100%"
-                    value="{{ estimate.tenant_url }}">
+                {% else %}
+                <div style="display:none;">
+                    {% endif %}
+                    <label>
+                        <input type="radio" name="saasRadio" value="SaaS" checked="True">
+                        SaaS
+                    </label>
+                    <label>
+                        <input type="radio" name="saasRadio" value="Managed">
+                        Managed
+                    </label>
+                </div>
+                <div class="SaaS selectt">
+                    <label for="saas_url">Tenant URL</label>
+                    <input type="text" name="saas_url" placeholder="https://tenantid.live.dynatrace.com" size="100%"
+                        value="{{ estimate.tenant_url }}">
+                    <br>
+                </div>
+                <div class="Managed selectt" style="display: none;">
+                    <label for="managed_url">Managed MC Url</label>
+                    <input type="text" name="managed_url"
+                        placeholder="https://{cluster-id}-{nodeNr}.managed.internal.dynatrace.com:8021/e/{managed-tenant-id}"
+                        size="100%" value="{{ estimate.tenant_url }}">
+                    <br>
+                    <label for="ssoCSRFCookie">ssoCSRFCookie</label>
+                    <input type="text" name="ssoCSRFCookie" placeholder="ssoCSRFCookie"
+                        value="{{ estimate.ssoCSRFCookie }}">
+                    <br>
+                    <label for="jsessionId">jsessionId</label>
+                    <input type="text" name="jsessionId" placeholder="jsessionId" value="{{ estimate.jsessionId }}">
+                    <br>
+                </div>
+                <label for="api_token">API Token</label>
+                <input type="password" name="api_token" placeholder="dt0c01.xxxxx..." size="100%"
+                    value="{{ estimate.api_token }}">
+                <br>
+                <label for="resolution">Resolution</label>
+                <input type="text" name="resolution" placeholder="1h" value="{{ estimate.resolution }}">
+                <br>
+                <label for="from_timeframe">From Timeframe</label>
+                <input type="text" name="from_timeframe" placeholder="YYYY-MM-DD" value="{{ estimate.from_timeframe }}">
+                <br>
+                <label for="iterations">Iterations</label>
+                <input type="text" name="iterations" placeholder="4" value="{{ estimate.iterations }}">
+                <br>
+                <label for="days_per_iteration">Days per iteration</label>
+                <input type="text" name="days_per_iteration" placeholder="7" value="{{ estimate.days_per_iteration }}">
                 <br>
             </div>
-            <div class="Managed selectt" style="display: none;">
-                <label for="managed_url">Managed MC Url</label>
-                <input type="text" name="managed_url"
-                    placeholder="https://{cluster-id}-{nodeNr}.managed.internal.dynatrace.com:8021/e/{managed-tenant-id}"
-                    size="100%" value="{{ estimate.tenant_url }}">
-                <br>
-                <label for="ssoCSRFCookie">ssoCSRFCookie</label>
-                <input type="text" name="ssoCSRFCookie" placeholder="ssoCSRFCookie"
-                    value="{{ estimate.ssoCSRFCookie }}">
-                <br>
-                <label for="jsessionId">jsessionId</label>
-                <input type="text" name="jsessionId" placeholder="jsessionId" value="{{ estimate.jsessionId }}">
-                <br>
-            </div>
-            <label for="api_token">API Token</label>
-            <input type="password" name="api_token" placeholder="dt0c01.xxxxx..." size="100%"
-                value="{{ estimate.api_token }}">
-            <br>
-            <label for="resolution">Resolution</label>
-            <input type="text" name="resolution" placeholder="1h" value="{{ estimate.resolution }}">
-            <br>
-            <label for="from_timeframe">From Timeframe</label>
-            <input type="text" name="from_timeframe" placeholder="YYYY-MM-DD" value="{{ estimate.from_timeframe }}">
-            <br>
-            <label for="iterations">Iterations</label>
-            <input type="text" name="iterations" placeholder="4" value="{{ estimate.iterations }}">
-            <br>
-            <label for="days_per_iteration">Days per iteration</label>
-            <input type="text" name="days_per_iteration" placeholder="7" value="{{ estimate.days_per_iteration }}">
-            <br>
+            <input type="submit" value="Estimate costs" class="btn btn-primary btn-lg btn-block">
         </div>
-        <input type="submit" value="Estimate costs" class="btn btn-primary btn-lg btn-block">
-    </div>
 
 </form>
 {% endif %}
 
 <div>
     <canvas id="estimationChart"></canvas>
-  </div>
-  
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  
-  <script>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
     const ctx = document.getElementById('estimationChart');
-  
+    
     new Chart(ctx, {
-      type: 'bar',
-      data: {
-        labels: {{ estimate.labels| safe }},
-        datasets: [{
-          label: 'Pod-hours',
-          data: {{ estimate.values| safe }},
-          borderWidth: 1
-        }]
-      },
-      options: {
-        scales: {
-          y: {
-            beginAtZero: true
-          }
+        type: 'line',
+        data: {
+            labels: {{ estimate.labels | safe }},
+        datasets: [
+        {
+            label: 'Pod-hours',
+            data: {{ estimate.values_pod | safe }},
+        borderWidth: 1,
+        yAxisID: 'y'
+        },
+        {
+            label: 'Gib-hours',
+            data: {{ estimate.values_gib | safe }},
+        borderWidth: 1,
+        yAxisID: 'y1',
         }
-      }
+    ]
+      },
+        options: {
+        responsive: true,
+        interaction: {
+          mode: 'index',
+          intersect: false,
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                position: 'left'
+            },
+            y1:{
+                position: 'right',
+            grid: {
+             drawOnChartArea: false, // only want the grid lines for one axis to show up
+            },
+            }
+        }
+
+    }
     });
-  </script>
+</script>
 
 <br>
-{% if estimate.console or estimate.estimation_running %} 
+{% if estimate.console or estimate.estimation_running %}
 <div class="console">
-    
+
     Estimating costs for Tenant: {{ estimate.tenant_url}} from {{ estimate.from_timeframe }} <br>
     Doing {{ estimate.iterations }} iterations with {{ estimate.days_per_iteration }} days per iteration.<br>
     -------------------------------------------------- <br>
@@ -127,13 +149,16 @@ please be patient
     Total Pod Hours: {{ "{:,.2f}".format(estimate.t_pod_h) }} <br>
     Total Gib Hours: {{ "{:,.2f}".format(estimate.t_gib_h) }} <br>
     Total shortliving instances (App Observability): {{ "{:,}".format(estimate.t_shortliving_instances) }} <br>
-    Avg instances per iteration (App Observability): {{ "{:,.2f}".format(estimate.t_instances / estimate.iterations ) }}<br>
+    Avg instances per iteration (App Observability): {{ "{:,.2f}".format(estimate.t_instances / estimate.iterations )
+    }}<br>
 </div>
 {% endif %}
 
 <div style="font-size: small;">
-<em>Is Dynatrace not installed? or you want to make an estimation based on Kubectl commands and snapshots? <b><a href="/kubectl">Try out the shell script -- estimate.sh --</a></b>
-</em></div>
+    <em>Is Dynatrace not installed? or you want to make an estimation based on Kubectl commands and snapshots? <b><a
+                href="/kubectl">Try out the shell script -- estimate.sh --</a></b>
+    </em>
+</div>
 <script type="text/javascript">
     $(document).ready(function () {
         $("input[name$='saasRadio']").

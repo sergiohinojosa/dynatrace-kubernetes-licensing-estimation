@@ -79,7 +79,8 @@ class Estimate:
 
         # Charting 
         self.labels = [1,2,3,4,5]
-        self.values = [1,2,3,4,5]
+        self.values_pod = [10,8,14,13,16]
+        self.values_gib = [100,90,125,130,150]
 
         # Dynamic Query
         # API V2 Endpoint for metric selection
