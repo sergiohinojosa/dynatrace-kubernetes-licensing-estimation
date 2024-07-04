@@ -249,7 +249,13 @@ def estimate_costs(e):
         mem_query.set_date_to(date_to)
         mem_Queries.append(mem_query)
         logging.debug("From to Query mode activated.")
-    
+
+    # Hack for querying big environments. We can calculate endtime for 0 iterations, 
+    # so we skip querying the cluster but still query billing metrics and amount of hosts.
+    if e.iterations == 0:
+        date_from_end = date_from + datetime.timedelta(days=e.days_per_iteration)
+        date_to = date_from_end
+
     # Calculate again beginning and end for getting actual billing consumption, no iteration, 
     # getting the sum of the whole timeperiod
     q_from = e.q_from + str(int(datetime.datetime.strptime(e.from_timeframe, conf.FORMAT_DATE).timestamp() * 1000))
@@ -342,10 +348,10 @@ def estimate_costs(e):
     e.k8_costs= e.t_pod_h * e.price_pod_hour
     e.app_costs= e.t_gib_h * e.price_gib_hour
     # Avg Consumption pod-hour
-    daily_pod_h = round(e.t_pod_h / ( e.iterations * e.days_per_iteration))
+    daily_pod_h = round(divide(e.t_pod_h, ( e.iterations * e.days_per_iteration)))
     year_pod_h = round(daily_pod_h * 365)
     # Avg Consumption Gib-hour
-    daily_gib_h = round(e.t_gib_h / ( e.iterations * e.days_per_iteration))
+    daily_gib_h = round(divide(e.t_gib_h, ( e.iterations * e.days_per_iteration)))
     year_gib_h = round(daily_gib_h * 365)
 
     e.console = e.console + "--------------------------------------------------<br>"

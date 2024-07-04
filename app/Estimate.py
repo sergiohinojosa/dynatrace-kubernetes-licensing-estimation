@@ -229,9 +229,6 @@ class Estimate:
         if self.iterations >= 30:
             raise SyntaxWarning("Really? Do you want to iterate more than 30 times?")
     
-        if self.days_per_iteration >= 31:
+        if self.iterations > 0 and self.days_per_iteration >= 31:
             raise SyntaxWarning("Really? Do you want to iterate more than 31 days per iteration?")
         
-        #TODO Validate timeframe format
-        #TODO Validate to timeframe with iterations
-        #self.from_timeframe
