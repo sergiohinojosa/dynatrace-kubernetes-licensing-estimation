@@ -384,7 +384,7 @@ def estimate_costs(e):
     return 
 
 def log_console_limited_warning(estimate, query):
-    if len(query.warnings) > 0 and str(query.warnings) not in "limited":
+    if len(query.warnings) > 0 and "limited" in str(query.warnings):
         estimate.console = estimate.console + "Warning, the above consumption is not accurate due dimension limits!<br>"
 
 def percentage(part , whole):
