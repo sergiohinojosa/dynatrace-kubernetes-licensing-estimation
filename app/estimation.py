@@ -366,8 +366,11 @@ def estimate_costs(e):
     e.console = e.console + "Yearly estimation of {} Gib-hours<br>".format(f"{year_gib_h:,}")
     e.console = e.console + "<br>"
     e.console = e.console + "Fullstack consumption for T: {} Gib-hours.   Estimation ratio {}% <br>".format(f"{e.t_gib_h_fullstack:,}", f"{percentage(e.t_gib_h , e.t_gib_h_fullstack):.3f}" )
+    log_console_limited_warning(e,fullstack_query)
     e.console = e.console + "Fullstack for Kubernetes Hosts consumption for T: {} Gib-hours.    FullStack ratio {}%, Estimation ratio {}%<br>".format(f"{e.t_gib_h_fullstack_k8s:,}", f"{percentage(e.t_gib_h_fullstack_k8s , e.t_gib_h_fullstack):.3f}", f"{percentage(e.t_gib_h , e.t_gib_h_fullstack_k8s):.3f}")
+    log_console_limited_warning(e,fullstack_k8s_query)
     e.console = e.console + "Fullstack for AppOnly consumption for T: {} Gib-hours.   FullStack ratio {}%, Estimation ratio {}%<br>".format(f"{e.t_gib_h_fullstack_apponly:,}", f"{percentage(e.t_gib_h_fullstack_apponly , e.t_gib_h_fullstack ):.3f}", f"{percentage( e.t_gib_h , e.t_gib_h_fullstack_apponly):.3f}")
+    log_console_limited_warning(e,fullstack_apponly_query)
 
     logging.info("Kubernetes Monitoring estimation from %s to %s = %s pod-hours", e.from_timeframe, date_to, f"{e.t_pod_h:,}")
     logging.info("Kubernetes Monitoring estimated costs are %s pod-hours * %s USD = $%s USD", f"{e.t_pod_h:,}", str(e.price_pod_hour), f"{e.k8_costs:,}")
@@ -379,6 +382,10 @@ def estimate_costs(e):
     logging.info("Total costs are $%s USD", f"{(e.k8_costs + e.app_costs):,}")
 
     return 
+
+def log_console_limited_warning(estimate, query):
+    if len(query.warnings) > 0 and "limited" in str(query.warnings):
+        estimate.console = estimate.console + "Warning, the above consumption is not accurate due dimension limits!<br>"
 
 def percentage(part , whole):
     """ Function to return a percentage, handles also div by zero"""
