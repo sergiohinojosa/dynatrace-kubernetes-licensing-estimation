@@ -373,13 +373,9 @@ def estimate_costs(e):
     log_console_limited_warning(e,fullstack_apponly_query)
 
     logging.info("Kubernetes Monitoring estimation from %s to %s = %s pod-hours", e.from_timeframe, date_to, f"{e.t_pod_h:,}")
-    logging.info("Kubernetes Monitoring estimated costs are %s pod-hours * %s USD = $%s USD", f"{e.t_pod_h:,}", str(e.price_pod_hour), f"{e.k8_costs:,}")
     logging.info("")
     logging.info("Application Observability estimation from %s to %s = %s Gib-hours", e.from_timeframe, date_to, f"{e.t_gib_h:,}")
-    logging.info("Application Observability estimated costs are %s Gib-hours * %s USD = $%s USD", f"{e.t_gib_h:,}", str(e.price_gib_hour), f"{e.app_costs:,}")
-    
     logging.info("")
-    logging.info("Total costs are $%s USD", f"{(e.k8_costs + e.app_costs):,}")
 
     return 
 
