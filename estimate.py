@@ -12,10 +12,6 @@ import traceback
 from flask import session
 import requests
 
-# TODO Documentation
-
-# TODO Installation PIP Requirements
-
 # POD-hour calculation as per doc
 # https://docs.dynatrace.com/docs/shortlink/dps-containers#billing-granularity-for-pod-hour-consumption
 
@@ -356,7 +352,7 @@ def estimate_podhours(podQuery):
     return
 
 def estimate_costs():
-    """Function to estimate the costs"""
+    """Function to estimate the consumption"""
     # TODO Get Names in the payload
     pod_Queries = []
     mem_Queries = []
@@ -452,14 +448,12 @@ def estimate_costs():
     app_costs= t_gib_h * price_gib_hour
     
     logging.info("Kubernetes Monitoring consumption from %s to %s = %s pod-hours", from_timeframe, date_to, f"{t_pod_h:,}")
-    logging.info("Kubernetes Monitoring estimated costs are %s pod-hours * %s USD = $%s USD", f"{t_pod_h:,}", str(price_pod_hour), f"{k8_costs:,}")
+    logging.info("Kubernetes Monitoring estimated consumption is %s pod-hours * %s USD = $%s USD", f"{t_pod_h:,}", str(price_pod_hour), f"{k8_costs:,}")
     logging.info("")
     logging.info("Application Observability consumption from %s to %s = %s Gib-hours", from_timeframe, date_to, f"{t_gib_h:,}")
-    logging.info("Application Observability estimated costs are %s Gib-hours * %s USD = $%s USD", f"{t_gib_h:,}", str(price_gib_hour), f"{app_costs:,}")
-    
+    logging.info("Application Observability estimated consumption is %s Gib-hours * %s USD = $%s USD", f"{t_gib_h:,}", str(price_gib_hour), f"{app_costs:,}")
     logging.info("")
-    logging.info("Total costs are $%s USD", f"{(k8_costs + app_costs):,}")
-
+    
     return 
 
 def estimate_memory(memQuery):
@@ -535,7 +529,7 @@ def main():
         printUsage = False
 
         logging.info("=================================================")
-        logging.info("   Dynatrace License cost estimation for      \n")
+        logging.info("   Dynatrace License consumption estimation for      \n")
         logging.info("        Kubernetes Monitoring")
         logging.info("                 and ")
         logging.info("      Application Observability  ")
@@ -558,7 +552,7 @@ def main():
     if printUsage:
         doUsage(sys.argv)
     else:
-        print("\nDone calculating costs... have a nice day")
+        print("\nDone calculating consumption... have a nice day")
     exit
 
 def get_usage_as_string():

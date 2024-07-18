@@ -1,11 +1,11 @@
 {% extends "base.html" %}
 
-{% block title %} K8stimator - Kubernetes DPS Costs Estimator {% endblock %}
+{% block title %} K8stimator - Kubernetes DPS Consumption Estimator {% endblock %}
 
 {% block body %}
 
 <div>
-    <h3 style="text-align: center;">K8stimator - Kubernetes DPS Costs Estimator </h3>
+    <h3 style="text-align: center;">K8stimator - Kubernetes DPS Consumption Estimator </h3>
 </div>
 
 
@@ -78,7 +78,7 @@ please be patient
                 <input type="text" name="days_per_iteration" placeholder="7" value="{{ estimate.days_per_iteration }}">
                 <br>
             </div>
-            <input type="submit" value="Estimate costs" class="btn btn-primary btn-lg btn-block">
+            <input type="submit" value="Estimate consumption" class="btn btn-primary btn-lg btn-block">
         </div>
 
 </form>
@@ -152,7 +152,7 @@ please be patient
 <br>
 <div class="console">
 
-    Estimating costs for Tenant: {{ estimate.tenant_url}} from {{ estimate.from_timeframe }} <br>
+    Estimating consumption for Tenant: {{ estimate.tenant_url}} from {{ estimate.from_timeframe }} <br>
     Doing {{ estimate.iterations }} iterations with {{ estimate.days_per_iteration }} days per iteration.<br>
     -------------------------------------------------- <br>
     {{ estimate.console | safe }}

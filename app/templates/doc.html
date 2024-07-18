@@ -25,7 +25,7 @@
   pods for verifying the accuracy of the resolution since the recommended resolution is 1 hour and not 15 minutes (as
   stated in the documentation). This because of increasing performance (reducing the payload by 400%) and avoiding
   metrics limitations without impacting the accuracy of the estimation. Normally a resolution of 1h in big environments
-  is not bigger that 1%. Meaning only 1% of the short-living pods existed one time (had one data point) during the specified resolution, with this approach is possible to increase the resolution knowing how big the impact is in the accuracy. However, is good to know that the impact is just a higher impact on the costs by calculating more data-points (Gib-hours) of the pod than they should which at the end will not result in unpredicted costs to the customer. Still the goal is to be as accurate as possible, but if there is an inaccuracy, this should be at least in higher costs and not the other way around.  
+  is not bigger that 1%. Meaning only 1% of the short-living pods existed one time (had one data point) during the specified resolution, with this approach is possible to increase the resolution knowing how big the impact is in the accuracy. However, is good to know that the impact is just a higher impact on the consumption by calculating more data-points (Gib-hours) of the pod than they should which at the end will not result in unpredicted consumption to the customer. Still the goal is to be as accurate as possible, but if there is an inaccuracy, this should be at least in higher consumption and not the other way around.  
   <br><br>
   At the end of all the iterations, a sum will be done calculating the total ammount of Pod-hours and Gib-hours. Also a
   daily average will be calculated and a yearly estimation will be done. This assuming of course the dynamics of the
@@ -55,7 +55,7 @@
   </b>
   With the above query, you query the server in a resolution that is acceptable and accurate, you get the last 14 days and with this the program will estimate the average consumption and the yearly consumption. If you need assistance, please don't hesitate in contacting Sergio.
   <br><br>
-  Warning, do not calculate Iterations of 1 day with a resolution of 1 day, since the estimation will not be accurate and will incur in higher costs.
+  Warning, do not calculate Iterations of 1 day with a resolution of 1 day, since the estimation will not be accurate and will incur in higher consumption.
   <h4>🔄 Why do we need an Iterative approach?</h4>
   In order to be able to calculate and fetch data from big Kubernetes or OpenShift environments with tausends, hundreds
   of tausends or even millions of pods, we need to split the timeframe with an iterational approach. Specially because
@@ -68,7 +68,7 @@
   Yes, this program is running at the moment in a replica set in a GKE Cluster with no connection to our corporate VPN. Mission Control connection details are hidden. When running inside VPN, a Solution Enginner can establish a connection to the Managed Cluster, enter the connection details (which are hidden if not inside VPN) and the make the same query. An alternate way is to run the container as a standalone docker container within our corporate VPN. For more guidance contact Sergio.
   <br><br>
   <h4>🐛 I opened a new tab and the Estimator is still running, is this a bug? </h4>
-  No, this is made by design for various reasons. Querying the Dynatrace Clusters with this type of data can take multiple seconds and even minutes per query. If the user is not patient, which we are not by default, we tend to send a new request. This behaviour will overload the application making it fail also for all other users and queries. The program is distributed in various pods on the backend. The NGINX Proxy uses sticky sessions to link the user session to the pod running the query and calculating the costs. This way the user can see the progress of the query and we avoid overloading of requests. The application is multithreaded and can manage multiple requests at the same time. In case you need to run another query at the same time, please just open another browser or a browser with incognito window. 
+  No, this is made by design for various reasons. Querying the Dynatrace Clusters with this type of data can take multiple seconds and even minutes per query. If the user is not patient, which we are not by default, we tend to send a new request. This behaviour will overload the application making it fail also for all other users and queries. The program is distributed in various pods on the backend. The NGINX Proxy uses sticky sessions to link the user session to the pod running the query and calculating the consumption. This way the user can see the progress of the query and we avoid overloading of requests. The application is multithreaded and can manage multiple requests at the same time. In case you need to run another query at the same time, please just open another browser or a browser with incognito window. 
   
   <br><br>
   <h4>ℹ️ More information about Kubernetes Observability and Application Observability consumption</h4>

@@ -202,7 +202,7 @@ def estimate_costs_wrapper(e):
 
 def estimate_costs(e):
 
-    """Function to estimate the costs"""
+    """Function to estimate the consumption"""
     pod_Queries = []
     mem_Queries = []
 
@@ -344,7 +344,7 @@ def estimate_costs(e):
     # Fetch the actual FullStack consumption of the Tenant
     fetch_actual_consumption(e, fullstack_query, fullstack_k8s_query, fullstack_apponly_query) 
 
-    # Costs calculation
+    # Consumption calculation
     e.k8_costs= e.t_pod_h * e.price_pod_hour
     e.app_costs= e.t_gib_h * e.price_gib_hour
     # Avg Consumption pod-hour
@@ -355,7 +355,7 @@ def estimate_costs(e):
     year_gib_h = round(daily_gib_h * 365)
 
     e.console = e.console + "--------------------------------------------------<br>"
-    e.console = e.console + "Estimation based on the costs retrieved from the iterations from T: {} - {}<br>".format(e.from_timeframe, date_to)
+    e.console = e.console + "Estimation based on the consumption retrieved from the iterations from T: {} - {}<br>".format(e.from_timeframe, date_to)
     e.console = e.console + "<br>"
     e.console = e.console + "Kubernetes Monitoring estimation = {} pod-hours<br>".format(f"{e.t_pod_h:,}")
     e.console = e.console + "Avg daily estimation of {} pod-hours<br>".format(f"{daily_pod_h:,}")
@@ -491,7 +491,7 @@ def main():
     if printUsage:
         doUsage(sys.argv)
     else:
-        print("\nDone calculating costs... have a nice day")
+        print("\nDone calculating consumption... have a nice day")
     exit
 
 def get_usage_as_string():
