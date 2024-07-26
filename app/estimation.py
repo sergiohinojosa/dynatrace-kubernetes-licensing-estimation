@@ -385,7 +385,7 @@ def estimate_costs(e):
     e.console = e.console + "- Yearly estimation of {} Gib-hours<br>".format(f"{year_gib_h:,}")
     e.console = e.console + "<br>"
     e.console = e.console + "<br>"
-    e.console = e.console + "--------------------------- Actual Consumption ---------------------------   <br>"
+    e.console = e.console + "--------------------------- billing.full_stack_monitoring consumption ---------------------------   <br>"
     e.console = e.console + "Actual consumption gathered from the billing metrics for the same timeframe:<br>"
     e.console = e.console + "<br>"
     e.console = e.console + "Total Fullstack consumption for all hosts is {} Gib-hours.<br>".format(f"{e.t_gib_h_fullstack:,}")
@@ -405,9 +405,12 @@ def estimate_costs(e):
     e.console = e.console + "<br>"
     e.console = e.console + "Classic/CloudNative + AppOnly yearly consumption ~ {} Gib-hours can decrease by {}% <br>".format(f"{year_k8s_app_total_gib_h:,}", f"{100 - percentage(year_gib_h, year_k8s_app_total_gib_h  ):.3f}")
     e.console = e.console + "<br>"
+    e.console = e.console + "<br>"
+    e.console = e.console + "--------------------------- Use Cases ---------------------------  <br>"
+    e.console = e.console + "<br>"
     e.console = e.console + "<b>Use Case - stay with Classic/CloudNative </b><br>"
     e.console = e.console + "<br>"
-    e.console = e.console + "The yearly consumptions from above apply. The billing from Application Observability will be reduced since the consumption is based on average usage and not on the limits of the containers nor host memory.<br>"
+    e.console = e.console + "The yearly consumptions from 'billing.full_stack_monitoring' apply. The billing from Application Observability will be reduced since the consumption is based on average usage and not on the limits of the containers nor host memory.<br>"
     e.console = e.console + "The POD-hours will be included in Classic/CloudNative deployments.<br>"
     e.console = e.console + "<br>"
     e.console = e.console + "<br>"

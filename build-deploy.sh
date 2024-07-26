@@ -2,7 +2,7 @@
 
 name="k8stimator"
 
-version=0.38
+version=0.40
 
 image="shinojosa/$name:$version"
 
