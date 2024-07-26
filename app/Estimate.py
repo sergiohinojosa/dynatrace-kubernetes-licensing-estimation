@@ -127,13 +127,11 @@ class Estimate:
 
         self.q_to_unit=":toUnit(Byte," + self.unit + ")"
 
-        self.q_fullstack_k8s = """builtin:billing.full_stack_monitoring.usage_per_host:filter(and(or(
-        in("dt.entity.host",entitySelector("type(HOST),softwareTechnologies(KUBERNETES)")),
-        in("dt.entity.host",entitySelector("type(HOST),paasVendorType(KUBERNETES)")),
-        in("dt.entity.host",entitySelector("type(HOST),paasVendorType(OPENSHIFT)")
-        )))):splitBy():splitBy():sum:fold(value)"""
+        self.q_fullstack_k8s = """builtin:billing.full_stack_monitoring.usage_per_host:filter(and(
+        in("dt.entity.host",entitySelector("type(HOST),softwareTechnologies(KUBERNETES)"))
+        )):splitBy():splitBy():sum:fold(value)"""
 
-        self.q_fullstack = "builtin:billing.full_stack_monitoring.usage_per_host:splitBy():sum:fold(value)"
+        self.q_fullstack = "builtin:billing.full_stack_monitoring.usage:splitBy():sum:fold(value)"
 
         self.q_fullstack_apponly = "builtin:billing.full_stack_monitoring.usage_per_container:splitBy():sum:fold(value)"
         

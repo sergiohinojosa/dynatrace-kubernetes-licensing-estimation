@@ -354,22 +354,73 @@ def estimate_costs(e):
     daily_gib_h = round(divide(e.t_gib_h, ( e.iterations * e.days_per_iteration)))
     year_gib_h = round(daily_gib_h * 365)
 
-    e.console = e.console + "--------------------------------------------------<br>"
-    e.console = e.console + "Estimation based on the consumption retrieved from the iterations from T: {} - {}<br>".format(e.from_timeframe, date_to)
+    # Avg Total Consumption
+    daily_total_gib_h = round(divide(e.t_gib_h_fullstack, ( e.iterations * e.days_per_iteration)))
+    year_total_gib_h = round(daily_total_gib_h * 365)
+
+    daily_k8s_total_gib_h = round(divide(e.t_gib_h_fullstack_k8s, ( e.iterations * e.days_per_iteration)))
+    year_k8s_total_gib_h = round(daily_k8s_total_gib_h * 365)
+
+    daily_app_total_gib_h = round(divide(e.t_gib_h_fullstack_apponly, ( e.iterations * e.days_per_iteration)))
+    year_app_total_gib_h = round(daily_app_total_gib_h * 365)
+
+    year_k8s_app_total_gib_h = year_k8s_total_gib_h + year_app_total_gib_h
+
+    # Projected consumption for the year is total - k8s_from billing - app_only from billing + estimation of all pods 
+    projected_total_gib_h = year_total_gib_h  - year_k8s_total_gib_h - year_app_total_gib_h + year_gib_h
+
+
+
+    e.console = e.console + "<br>"
+    e.console = e.console + "<br>"
+    e.console = e.console + "======================== Summary of the estimations ========================<br>"
+    e.console = e.console + "Summary of the estimations retrieved from the iterations from {} until {}:<br>".format(e.from_timeframe, date_to)
     e.console = e.console + "<br>"
     e.console = e.console + "Kubernetes Monitoring estimation = {} pod-hours<br>".format(f"{e.t_pod_h:,}")
-    e.console = e.console + "Avg daily estimation of {} pod-hours<br>".format(f"{daily_pod_h:,}")
-    e.console = e.console + "Yearly estimation of {} pod-hours<br>".format(f"{year_pod_h:,}")
+    e.console = e.console + "- Avg daily estimation of {} pod-hours<br>".format(f"{daily_pod_h:,}")
+    e.console = e.console + "- Yearly estimation of {} pod-hours<br>".format(f"{year_pod_h:,}")
     e.console = e.console + "<br>"
     e.console = e.console + "Application Observability estimation = {} Gib-hours<br>".format(f"{e.t_gib_h:,}")
-    e.console = e.console + "Avg daily estimation of {} Gib-hours<br>".format(f"{daily_gib_h:,}")
-    e.console = e.console + "Yearly estimation of {} Gib-hours<br>".format(f"{year_gib_h:,}")
+    e.console = e.console + "- Avg daily estimation of {} Gib-hours<br>".format(f"{daily_gib_h:,}")
+    e.console = e.console + "- Yearly estimation of {} Gib-hours<br>".format(f"{year_gib_h:,}")
     e.console = e.console + "<br>"
-    e.console = e.console + "Fullstack consumption for T: {} Gib-hours.   Estimation ratio {}% <br>".format(f"{e.t_gib_h_fullstack:,}", f"{percentage(e.t_gib_h , e.t_gib_h_fullstack):.3f}" )
+    e.console = e.console + "<br>"
+    e.console = e.console + "--------------------------- Actual Consumption ---------------------------   <br>"
+    e.console = e.console + "Actual consumption gathered from the billing metrics for the same timeframe:<br>"
+    e.console = e.console + "<br>"
+    e.console = e.console + "Total Fullstack consumption for all hosts is {} Gib-hours.<br>".format(f"{e.t_gib_h_fullstack:,}")
+    e.console = e.console + " - Avg daily consumption for all hosts ~ {} Gib-hours.<br>".format(f"{daily_total_gib_h:,}")
+    e.console = e.console + " - Yearly consumption for all hosts ~ {} Gib-hours.<br>".format(f"{year_total_gib_h:,}")
     log_console_limited_warning(e,fullstack_query)
-    e.console = e.console + "Fullstack for Kubernetes Hosts consumption for T: {} Gib-hours.    FullStack ratio {}%, Estimation ratio {}%<br>".format(f"{e.t_gib_h_fullstack_k8s:,}", f"{percentage(e.t_gib_h_fullstack_k8s , e.t_gib_h_fullstack):.3f}", f"{percentage(e.t_gib_h , e.t_gib_h_fullstack_k8s):.3f}")
-    log_console_limited_warning(e,fullstack_k8s_query)
-    e.console = e.console + "Fullstack for AppOnly consumption for T: {} Gib-hours.   FullStack ratio {}%, Estimation ratio {}%<br>".format(f"{e.t_gib_h_fullstack_apponly:,}", f"{percentage(e.t_gib_h_fullstack_apponly , e.t_gib_h_fullstack ):.3f}", f"{percentage( e.t_gib_h , e.t_gib_h_fullstack_apponly):.3f}")
+    e.console = e.console + "<br>"
+    e.console = e.console + "Kubernetes Classic/CloudNative consumption is {} Gib-hours.<br>".format(f"{e.t_gib_h_fullstack_k8s:,}")
+    e.console = e.console + " - Avg daily Classic/CloudNative consumption ~ {} Gib-hours.<br>".format(f"{daily_k8s_total_gib_h:,}")
+    e.console = e.console + " - Yearly Classic/CloudNative consumption ~ {} Gib-hours.<br>".format(f"{year_k8s_total_gib_h:,}")
+    e.console = e.console + " - Represents {}% of the total FullStack consumption.<br>".format(f"{percentage(e.t_gib_h_fullstack_k8s , e.t_gib_h_fullstack):.3f}")
+    e.console = e.console + "<br>"
+    e.console = e.console + "Application Observability consumption is {} Gib-hours.<br>".format(f"{e.t_gib_h_fullstack_apponly:,}")
+    e.console = e.console + " - Avg daily Application Observability consumption ~ {} Gib-hours.<br>".format(f"{daily_app_total_gib_h:,}")
+    e.console = e.console + " - Yearly Application Observability ~ {} Gib-hours.<br>".format(f"{year_app_total_gib_h:,}")
+    e.console = e.console + " - Represents {}% of the total FullStack consumption.<br>".format(f"{percentage(e.t_gib_h_fullstack_apponly , e.t_gib_h_fullstack ):.3f}")
+    e.console = e.console + "<br>"
+    e.console = e.console + "Classic/CloudNative + AppOnly yearly consumption ~ {} Gib-hours can decrease by {}% <br>".format(f"{year_k8s_app_total_gib_h:,}", f"{100 - percentage(year_gib_h, year_k8s_app_total_gib_h  ):.3f}")
+    e.console = e.console + "<br>"
+    e.console = e.console + "<b>Use Case - stay with Classic/CloudNative </b><br>"
+    e.console = e.console + "<br>"
+    e.console = e.console + "The yearly consumptions from above apply. The billing from Application Observability will be reduced since the consumption is based on average usage and not on the limits of the containers nor host memory.<br>"
+    e.console = e.console + "The POD-hours will be included in Classic/CloudNative deployments.<br>"
+    e.console = e.console + "<br>"
+    e.console = e.console + "<br>"
+    e.console = e.console + "<b>Use Case - move Classic/CloudNative -> 100% Application Observability</b><br>"
+    e.console = e.console + "<br>"
+    e.console = e.console + "The estimated yearly consumption for all hosts of ~ {} Gib-hours will be reduced to {} Gib-hours which is a reduction of {}% <br>".format(f"{year_total_gib_h:,}", f"{projected_total_gib_h:,}", f"{100 - percentage(projected_total_gib_h, year_total_gib_h):.3f}" )
+    e.console = e.console + "Application Observability yearly estimation of ~ {} Gib-hours<br>".format(f"{year_gib_h:,}")
+    e.console = e.console + "Kubernetes Observability yearly estimation of ~ {} Pod-hours<br>".format(f"{year_pod_h:,}")
+    e.console = e.console + "<br>"
+    e.console = e.console + "Be aware that for this change to take effect, the deployment needs to be changed in every cluster.<br> "
+    e.console = e.console + "Some infrastructure metrics of the ClusterNodes will be missing and the Log Module needs to be configured."
+    e.console = e.console + "<br>"
+    e.console = e.console + "<br>"
     log_console_limited_warning(e,fullstack_apponly_query)
 
     logging.info("Kubernetes Monitoring estimation from %s to %s = %s pod-hours", e.from_timeframe, date_to, f"{e.t_pod_h:,}")
