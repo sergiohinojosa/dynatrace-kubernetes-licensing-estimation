@@ -43,7 +43,7 @@
   <h4>❌ I get an error 503! Service Unavailable within the warning of the query, what do I do? </h4>
   If you get an error like the following: <br>
   <i style="font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif">:warning: There was an error: Query [builtin:tech.generic.mem.workingSetSize] status : code:503 reason:Service Unavailable Content:b'{"error": {"code": 503,"message": "We've run into technical difficulties. Don't worry though - your data is secure and we've logged this issue. Please try again in 5 minutes."}}'</i>
-  <br><br> Most likely the Cluster has a lot of Kubernetes entities and the query is bringing the cluster to its knees. There is a workaround though. Take the last 7 or 14 days and make an estimate like the following: 
+  <br><br> Most likely the Cluster has a lot of Kubernetes entities (within the millions or billions) and the query is being timeouted in the backend. There is a workaround though. Take the last 7 or 14 days and make an estimate like the following: 
   <br>
   <br>
   <b><p>
