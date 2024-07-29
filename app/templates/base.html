@@ -164,15 +164,15 @@
 
 <body>
 
-  <nav class="nav">
+  <div class="nav">
     <a class="nav__brand" target="_blank" href="https://www.dynatrace.com/monitoring/technologies/kubernetes-monitoring/">
       <img class="js-disable-lazy" src="https://cdn.bfldr.com/B686QPH3/at/rnpz35kzrbn3ngbs5w27xb6g/Dt_Logo_Color-Vertical.svg?auto=webp&format=svg"
-        alt="Software Intelligence for the Enterprise Cloud" ></a>
+        height="50" alt="Software Intelligence for the Enterprise Cloud" ></a>
   
     <div class="nav__list">
       <a class="nav__button" target="_blank" href="https://github.com/sergiohinojosa/dynatrace-kubernetes-licensing-estimation"><img
-          alt="Github repo" src="https://pngimg.com/uploads/github/github_PNG55.png"
-          height="30"  style="color:cornflowerblue;font-size: medium;" ></a>
+          alt="Github repo" src="https://git-scm.com/images/logos/downloads/Git-Logo-Black.svg"
+          height="25"  style="color:cornflowerblue;font-size: medium;" ></a>
     </div>
     <div class="k8snav">
       <a href="/">Estimate</a>
@@ -180,7 +180,7 @@
       <a href="/doc">Documentation</a>
       <a href="/help">Contact</a>
     </div>
-  </nav>
+  </div>
     
   <br>
   <div class="container">
@@ -211,12 +211,12 @@
   <footer class="container" style="text-align: center;">© 2024 Dynatrace - Solution Engineering</footer>
   
   <br>
-  <footer class="rum">
+  <div class="rum">
     <div class="uid"> Cache-Id: {{ estimate.uid }} </div>
-    <div> Release-Version: {{ release_version }} </div>
-    <div> Computing POD: {{ pod_name }} </div>
-  </footer>
-
+    <div> Release-Version: {{ estimate.release_version }} </div>
+    <div> Computing Node: {{ estimate.node_name }} </div>
+    <div> Computing POD: {{ estimate.pod_name }} </div>
+  </div>
 </body>
 
 </html>

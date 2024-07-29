@@ -61,6 +61,13 @@ class Estimate:
         self.price_pod_hour = 0.002
         self.price_gib_hour = 0.01
 
+        # K8s Env vars
+        self.inside_vpn = False
+        self.release_version = "0.0"
+        self.pod_name = "pod_name"
+        self.pod_namespace = "namespace"
+        self.node_name = "node_name"
+
         # FullStack Consumption
         self.t_gib_h_fullstack = 0
         self.t_gib_h_fullstack_k8s = 0
