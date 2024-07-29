@@ -5,7 +5,7 @@
 {% block body %}
 
 <div>
-    <h3 style="text-align: center;">K8stimator - Kubernetes DPS Consumption Estimator </h3>
+     <h3 style="text-align: center;"><img src="https://uxwing.com/wp-content/themes/uxwing/download/brands-and-social-media/kubernetes-icon.png" alt="K8s" height="30"> K8stimator - Kubernetes DPS Consumption Estimator  </h3>
 </div>
 
 
@@ -78,14 +78,15 @@ please be patient
                 <input type="text" name="days_per_iteration" placeholder="7" value="{{ estimate.days_per_iteration }}">
                 <br>
             </div>
-            <input type="submit" value="Estimate consumption" class="btn btn-primary btn-lg btn-block">
+            <br>
+            <input type="submit" style="font-size: medium;" value="Estimate consumption 📈" class="btn btn-primary btn-lg btn-block">
         </div>
-
-</form>
-{% endif %}
+    </form>
+    {% endif %}
+    
 
 <br>
-{% if estimate.console or estimate.estimation_running %}
+{% if estimate.console|length > 1 or estimate.estimation_running %}
 
 <div>
     <canvas id="estimationChart"></canvas>
@@ -158,12 +159,24 @@ please be patient
     {{ estimate.console | safe }}
     <br>
     -------------------------------------------------- <br>
-    Summary:<br>
-    Total Pod Hours: {{ "{:,.2f}".format(estimate.t_pod_h) }} <br>
-    Total Gib Hours: {{ "{:,.2f}".format(estimate.t_gib_h) }} <br>
-    Total shortliving instances (App Observability): {{ "{:,}".format(estimate.t_shortliving_instances) }} <br>
+    <br>
 </div>
+
 {% endif %}
+
+{% if estimate.console|length > 1 and not estimate.estimation_running %}
+<input style="font-size: medium;" value='Print report 🖨️' type='button' onclick='window.print()' class="btn btn-primary btn-lg btn-block" />
+<br>
+
+{% elif estimate.estimation_running %}
+<div>
+    <input style="font-size: medium;" value='Print report 🖨️' type='button' onclick='window.print()' class="btn btn-primary btn-lg btn-block" disabled/>
+</div>
+<br>
+
+{% endif %}
+
+
 
 <div style="font-size: small;">
     <em>Is Dynatrace not installed? or you want to make an estimation based on Kubectl commands and snapshots? <b><a
@@ -171,6 +184,7 @@ please be patient
     </em>
 </div>
 <script type="text/javascript">
+
     $(document).ready(function () {
         $("input[name$='saasRadio']").
             click(
@@ -185,6 +199,7 @@ please be patient
                 }
             );
     }); 
+      
 </script>
 
 {% endblock %}

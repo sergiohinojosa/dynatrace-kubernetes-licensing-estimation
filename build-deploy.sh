@@ -1,17 +1,41 @@
 #!/bin/bash
 
-name="k8stimator"
+setVariables() {
 
-version=0.40
+    NAME="k8stimator"
+    NAMESPACE="k8stimator"
 
-image="shinojosa/$name:$version"
+    VERSION=0.42
+    IMAGE="shinojosa/$NAME:$VERSION"
 
-deployment=$name
-container=$image
-ns=$name
+    DEPLOYMENT=$NAME
+    CONTAINER=$IMAGE
+    YAMLFILE=$VERSION-$(date '+%Y-%m-%d_%H_%M_%S').yaml
+    export RELEASE_VERSION=$VERSION
+    export IMAGE=$IMAGE
 
-docker build --tag $image . 
+}
 
-docker image push $image
+buildDockerImage() {
+    docker build --tag $IMAGE .
+}
 
-kubectl set image deployment/$deployment $name=$container -n $ns
+pushImageToRepository() {
+
+    docker image push $IMAGE
+
+}
+
+createDeployment() {
+
+    envsubst <k8s/deployment.yaml >k8s/gen/deploy-$YAMLFILE
+
+    kubectl apply -f k8s/gen/deploy-$YAMLFILE
+    # kubectl set image deployment/$deployment $name=$container -n $ns
+}
+
+
+setVariables
+buildDockerImage
+pushImageToRepository
+createDeployment

@@ -91,23 +91,98 @@
     }
 
     .rum {
-      text-align: right;
-      font-size:small;
-      color:lightgray;
+      font-size:x-small;
+      color: rgb(149, 149, 149);
+      text-align: left;
 
     }
+
+        /* Navigation */
+    .nav {
+      display: inline-block;
+      position: fixed;
+      top: 0;
+      width: 100vw;
+      height: 80px;
+      z-index: 10000;
+      transition: all .2s ease;
+    }
+    .nav__brand,
+    .nav__list {
+      position: absolute;
+    }
+
+    .nav__brand {
+      left: 0;
+      width: 146px;
+      display: flex;
+      height: 54px;
+      margin-top: 13px;
+      margin-bottom: 13px;
+      margin-left: 16px;
+      transition: all .2s ease;
+    }
+    .nav__brand--slim {
+      margin-top: 0;
+      margin-bottom: 0;
+    }
+
+    .nav__list {
+      right: 0;
+      height: 40px;
+      width: 128px;
+      display: flex;
+      margin-top: 20px;
+      margin-bottom: 20px;
+      margin-right: 8px;
+      transition: all .2s ease;
+    }
+
+    .nav__list--slim {
+      height: 30px;
+      margin-top: 12px;
+      margin-bottom: 12px;
+    }
+
+    .k8snav {
+      text-align: center; 
+      background-color: #337ab7; 
+      color: white;
+    }
+    .k8snav > a {
+      color: white;
+    }
+    .k8snav > a:hover {
+      color:#85c5fe;
+    }
+
   </style>
 
 </head>
 
-<body>
-  <div style="text-align: center;">
-    <a href="/">Estimate</a>
-    <a href="/kubectl">Kubectl</a>
-    <a href="/doc">Documentation</a>
-    <a href="/help">Contact</a>
-  </div>
 
+
+<body>
+
+  <nav class="nav">
+    <a class="nav__brand" target="_blank" href="https://www.dynatrace.com/monitoring/technologies/kubernetes-monitoring/">
+      <img class="js-disable-lazy" src="https://cdn.bfldr.com/B686QPH3/at/rnpz35kzrbn3ngbs5w27xb6g/Dt_Logo_Color-Vertical.svg?auto=webp&format=svg"
+        alt="Software Intelligence for the Enterprise Cloud" ></a>
+  
+    <div class="nav__list">
+      <a class="nav__button" target="_blank" href="https://github.com/sergiohinojosa/dynatrace-kubernetes-licensing-estimation"><img
+          alt="Github repo" src="https://pngimg.com/uploads/github/github_PNG55.png"
+          height="30"  style="color:cornflowerblue;font-size: medium;" ></a>
+    </div>
+    <div class="k8snav">
+      <a href="/">Estimate</a>
+      <a href="/kubectl">Kubectl</a>
+      <a href="/doc">Documentation</a>
+      <a href="/help">Contact</a>
+    </div>
+  </nav>
+    
+  <br>
   <div class="container">
 
     {% if estimate.estimation_running %}
@@ -132,13 +207,16 @@
 
   <br>
   <br>
-
+  
   <footer class="container" style="text-align: center;">© 2024 Dynatrace - Solution Engineering</footer>
-
+  
+  <br>
   <footer class="rum">
-    <div class="tenant_url"> {{ estimate.tenant_url}} </div>
-    <div class="uid"> {{ estimate.uid}} </div>
+    <div class="uid"> Cache-Id: {{ estimate.uid }} </div>
+    <div> Release-Version: {{ release_version }} </div>
+    <div> Computing POD: {{ pod_name }} </div>
   </footer>
+
 </body>
 
 </html>

@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}Documentation{% endblock %}
 {% block body %}
-<h3 style="text-align: center;">K8stimator - Documentation</h3>
+<h3 style="text-align: center;"><img src="https://uxwing.com/wp-content/themes/uxwing/download/brands-and-social-media/kubernetes-icon.png" alt="K8s" height="30"> K8stimator - Documentation</h3>
 <div class="jumbotron">
   <h4>📈 How does the K8stimator work?</h4>
   The K8stimator only needs an API Token with access to "Read metrics (GET Requests to Metrics API v2)" and the tenant
@@ -56,6 +56,7 @@
   With the above query, you query the server in a resolution that is acceptable and accurate, you get the last 14 days and with this the program will estimate the average consumption and the yearly consumption. If you need assistance, please don't hesitate in contacting Sergio.
   <br><br>
   Warning, do not calculate Iterations of 1 day with a resolution of 1 day, since the estimation will not be accurate and will incur in higher consumption.
+  <br><br>
   <h4>🔄 Why do we need an Iterative approach?</h4>
   In order to be able to calculate and fetch data from big Kubernetes or OpenShift environments with tausends, hundreds
   of tausends or even millions of pods, we need to split the timeframe with an iterational approach. Specially because
