@@ -9,6 +9,7 @@ log/*
 **/gen/**.yaml
 # No temp
 /tmp/**
+**/tmp/**
 
 # No Reports
 /report/**
