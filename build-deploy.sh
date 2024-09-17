@@ -5,7 +5,7 @@ setVariables() {
     NAME="k8stimator"
     NAMESPACE="k8stimator"
 
-    VERSION=1.03
+    VERSION=1.04
     IMAGE="shinojosa/$NAME:$VERSION"
 
     DEPLOYMENT=$NAME
